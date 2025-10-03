@@ -18,6 +18,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { QRCodeSVG } from "qrcode.react";
 import { toast } from "@/hooks/use-toast";
 import { Calendar, Clock, Users, Ticket, CreditCard } from "lucide-react";
+import { time } from "console";
 
 interface BookingData {
   date: string;
@@ -45,6 +46,8 @@ const BookTicket = () => {
 
    useEffect(() => {
     if (!date || !timing) return; // only fetch if date & timing are selected
+    console.log(date)
+    console.log(timing)
     axios.get(`http://localhost:8004/api/bookedSeats?date=${date}&timing=${timing}`)
       .then(res => setBookedSeats(res.data)) // array of seat numbers
       .catch(err => console.log(err));
