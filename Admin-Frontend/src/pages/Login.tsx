@@ -15,26 +15,29 @@ const Login = () => {
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Simple validation (In production, use proper authentication)
     if (username && password) {
-      localStorage.setItem("isAuthenticated", "true");
+      sessionStorage.setItem("isLoggedIn", "true");
       toast.success("Login successful!");
-      navigate("/movies");
+      navigate("/dashboard");
     } else {
       toast.error("Please enter username and password");
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-white to-secondary p-4">
-      <Card className="w-full max-w-md shadow-xl">
-        <CardHeader className="space-y-4 text-center">
-          <div className="flex justify-center">
-            <div className="bg-primary p-3 rounded-full">
-              <Film className="h-8 w-8 text-primary-foreground" />
-            </div>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-secondary to-background p-4">
+      <Card className="w-full max-w-md shadow-2xl border-2">
+        <CardHeader className="space-y-3 text-center">
+          <div className="mx-auto p-3 bg-gradient-to-br from-primary to-red-700 rounded-2xl shadow-lg w-fit">
+            <Film className="h-10 w-10 text-primary-foreground" />
           </div>
-          <CardTitle className="text-3xl font-bold">Sweden Tamil Film</CardTitle>
-          <CardDescription className="text-base">Admin Portal Login</CardDescription>
+          <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-red-700 bg-clip-text text-transparent">
+            Tamil Film Sweden
+          </CardTitle>
+          <CardDescription className="text-base">
+            Admin Panel Login
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-4">
@@ -46,7 +49,7 @@ const Login = () => {
                 placeholder="Enter your username"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="w-full"
+                className="h-11"
               />
             </div>
             <div className="space-y-2">
@@ -57,10 +60,13 @@ const Login = () => {
                 placeholder="Enter your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full"
+                className="h-11"
               />
             </div>
-            <Button type="submit" className="w-full bg-primary hover:bg-primary/90">
+            <Button 
+              type="submit" 
+              className="w-full h-11 bg-gradient-to-r from-primary to-red-700 hover:opacity-90 transition-opacity shadow-lg text-lg font-semibold"
+            >
               Login
             </Button>
           </form>

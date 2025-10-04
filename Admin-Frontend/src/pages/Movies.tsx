@@ -1,94 +1,73 @@
-import { useState } from "react";
-import Navbar from "@/components/Navbar";
+import { IndianRupee } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
-import { Button } from "@/components/ui/button";
-import { Edit } from "lucide-react";
+import movie1 from "@/assets/movie1.jpg";
+import movie2 from "@/assets/movie2.jpg";
+import movie3 from "@/assets/movie3.jpg";
+import movie4 from "@/assets/movie4.jpg";
+import movie5 from "@/assets/movie5.jpg";
+
+const movies = [
+  { id: 1, image: movie1, title: "Classic Tamil Film 1975", cost: 100, charges: 50 },
+  { id: 2, image: movie2, title: "Action Hero 1985", cost: 150, charges: 50 },
+  { id: 3, image: movie3, title: "Romance Classic 1995", cost: 120, charges: 50 },
+  { id: 4, image: movie4, title: "Family Drama 2005", cost: 150, charges: 50 },
+  { id: 5, image: movie5, title: "Modern Blockbuster 2024", cost: 200, charges: 75 },
+];
 
 const Movies = () => {
-  const [movies] = useState([
-    {
-      id: 1,
-      title: "Vikram",
-      cost: "150 SEK",
-      charges: "25 SEK booking fee",
-      image: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=800&q=80"
-    },
-    {
-      id: 2,
-      title: "Ponniyin Selvan",
-      cost: "175 SEK",
-      charges: "25 SEK booking fee",
-      image: "https://images.unsplash.com/photo-1594908900066-3f47337549d8?w=800&q=80"
-    },
-    {
-      id: 3,
-      title: "Varisu",
-      cost: "160 SEK",
-      charges: "25 SEK booking fee",
-      image: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=800&q=80"
-    },
-    {
-      id: 4,
-      title: "Jailer",
-      cost: "180 SEK",
-      charges: "25 SEK booking fee",
-      image: "https://images.unsplash.com/photo-1574267432644-f610b142e5b3?w=800&q=80"
-    }
-  ]);
-
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
-      <main className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2">Now Showing</h1>
-          <p className="text-muted-foreground">Browse and manage current movies</p>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-red-700 bg-clip-text text-transparent mb-2">
+            Movies Collection
+          </h1>
+          <p className="text-muted-foreground">Browse all available movies</p>
         </div>
 
-        <Carousel className="w-full max-w-5xl mx-auto">
-          <CarouselContent>
-            {movies.map((movie) => (
-              <CarouselItem key={movie.id} className="md:basis-1/2 lg:basis-1/3">
-                <Card className="overflow-hidden border-2 hover:border-primary transition-colors">
-                  <div className="aspect-[2/3] relative overflow-hidden">
-                    <img 
-                      src={movie.image} 
-                      alt={movie.title}
-                      className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                    />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {movies.map((movie) => (
+            <Card key={movie.id} className="group overflow-hidden shadow-lg hover:shadow-2xl transition-all hover:scale-105">
+              <div className="relative overflow-hidden">
+                <img
+                  src={movie.image}
+                  alt={movie.title}
+                  className="w-full h-96 object-cover group-hover:scale-110 transition-transform duration-300"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+              </div>
+              <CardContent className="p-5 space-y-3">
+                <h3 className="font-bold text-lg line-clamp-2 min-h-[3.5rem]">{movie.title}</h3>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Ticket Cost:</span>
+                    <span className="font-bold text-lg flex items-center gap-1">
+                      <IndianRupee className="h-4 w-4" />
+                      {movie.cost}
+                    </span>
                   </div>
-                  <CardContent className="p-4 space-y-3">
-                    <h3 className="text-xl font-bold">{movie.title}</h3>
-                    <div className="space-y-1 text-sm">
-                      <p className="flex justify-between">
-                        <span className="text-muted-foreground">Ticket Price:</span>
-                        <span className="font-semibold">{movie.cost}</span>
-                      </p>
-                      <p className="flex justify-between">
-                        <span className="text-muted-foreground">Booking Fee:</span>
-                        <span className="font-semibold">{movie.charges}</span>
-                      </p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Booking Charges:</span>
+                    <span className="font-semibold flex items-center gap-1">
+                      <IndianRupee className="h-4 w-4" />
+                      {movie.charges}
+                    </span>
+                  </div>
+                  <div className="pt-2 border-t">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">Total:</span>
+                      <span className="font-bold text-xl text-primary flex items-center gap-1">
+                        <IndianRupee className="h-5 w-5" />
+                        {movie.cost + movie.charges}
+                      </span>
                     </div>
-                    <Button className="w-full gap-2" variant="outline">
-                      <Edit className="h-4 w-4" />
-                      Edit Movie
-                    </Button>
-                  </CardContent>
-                </Card>
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-          <CarouselPrevious />
-          <CarouselNext />
-        </Carousel>
-
-        <div className="mt-8 text-center">
-          <Button className="bg-primary hover:bg-primary/90">
-            Add New Movie
-          </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
-      </main>
+      </div>
     </div>
   );
 };
