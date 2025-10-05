@@ -1,12 +1,11 @@
+// Routes/userRouter.js
 import express from "express";
-import { addBooking, getBookedSeats } from "../controller/userDetailControl.js";
+import { addBooking, getBookedSeats,addMovie,upload} from "../controller/userDetailControl.js";
 
 const userRouter = express.Router();
 
-// Add booking
 userRouter.post("/addBooking", addBooking);
-
-// Get booked seats
 userRouter.get("/bookedSeats", getBookedSeats);
+userRouter.post("/addDetails", upload.array("photos", 3), addMovie);
 
 export default userRouter;

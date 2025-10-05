@@ -97,7 +97,7 @@ const Dashboard = () => {
           </Card>
         </div>
 
-        {/* <MovieCarousel /> */}
+        
 
         {/* <Card className="shadow-lg">
           <CardContent className="p-6">
@@ -199,68 +199,75 @@ const Dashboard = () => {
     />
   </div>
 
-  {/* Show Dropdown */}
-  <div className="flex flex-col w-36">
-    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Show</label>
+  {/* Booking ID */}
+  <div className="flex flex-col w-40">
+    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Booking ID</label>
+    <input
+      type="text"
+      placeholder="Enter Booking ID"
+      className="mt-1 rounded-md border border-gray-300 dark:border-gray-600 px-2 py-1 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
+    />
+  </div>
+
+  {/* Payment Status */}
+  <div className="flex flex-col w-40">
+    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Payment Status</label>
     <select
       className="mt-1 rounded-md border border-gray-300 dark:border-gray-600 px-2 py-1 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
     >
-      <option value="morning">Morning</option>
-      <option value="afternoon">Afternoon</option>
-      <option value="evening">Evening</option>
-      <option value="night">Night</option>
+      <option value="">All</option>
+      <option value="paid">Paid</option>
+      <option value="pending">Pending</option>
     </select>
-  </div>
-
-  {/* Date Picker */}
-  <div className="flex flex-col w-36">
-    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Date</label>
-    <input
-      type="date"
-      className="mt-1 rounded-md border border-gray-300 dark:border-gray-600 px-2 py-1 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
-    />
   </div>
 </div>
 
 
 
     <div className="border rounded-lg overflow-hidden">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Member Name</TableHead>
-            <TableHead>Email</TableHead>
-            <TableHead className="text-center">Seats Booked</TableHead>
-            <TableHead className="text-center">Payment Status</TableHead>
-            <TableHead className="text-right">Amount</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {currentMovieBookings.map((booking, index) => (
-            <TableRow key={index}>
-              <TableCell className="font-medium">{booking.name}</TableCell>
-              <TableCell>{booking.email}</TableCell>
-              <TableCell className="text-center">{booking.seats}</TableCell>
-              <TableCell className="text-center">
-                <span
-                  className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                    booking.status === "Paid"
-                      ? "bg-green-100 text-green-700"
-                      : "bg-orange-100 text-orange-700"
-                  }`}
-                >
-                  {booking.status}
-                </span>
-              </TableCell>
-              <TableCell className="text-right font-semibold flex items-center justify-end gap-1">
-                <IndianRupee className="h-4 w-4" />
-                {booking.amount}
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </div>
+  <Table>
+    <TableHeader>
+      <TableRow>
+        <TableHead>Booking ID</TableHead>
+        <TableHead>Member Name</TableHead>
+        <TableHead>Email</TableHead>
+        <TableHead className="text-center">Seats Booked</TableHead>
+        <TableHead>Show</TableHead>
+        <TableHead>Booking Date</TableHead>
+        <TableHead className="text-center">Payment Status</TableHead>
+        <TableHead className="text-right">Amount</TableHead>
+      </TableRow>
+    </TableHeader>
+    <TableBody>
+      {currentMovieBookings.map((booking, index) => (
+        <TableRow key={index}>
+          <TableCell className="font-medium">{booking.bookingId}</TableCell>
+          <TableCell className="font-medium">{booking.name}</TableCell>
+          <TableCell>{booking.email}</TableCell>
+          <TableCell className="text-center">{booking.seats}</TableCell>
+          <TableCell>{booking.show}</TableCell>
+          <TableCell>{new Date(booking.date).toLocaleDateString()}</TableCell>
+          <TableCell className="text-center">
+            <span
+              className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                booking.status === "Paid"
+                  ? "bg-green-100 text-green-700"
+                  : "bg-orange-100 text-orange-700"
+              }`}
+            >
+              {booking.status}
+            </span>
+          </TableCell>
+          <TableCell className="text-right font-semibold flex items-center justify-end gap-1">
+            <IndianRupee className="h-4 w-4" />
+            {booking.amount}
+          </TableCell>
+        </TableRow>
+      ))}
+    </TableBody>
+  </Table>
+</div>
+
   </CardContent>
 </Card>
 
