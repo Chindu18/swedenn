@@ -12,28 +12,79 @@ import { Card, CardContent } from "@/components/ui/card";
 import moviePoster1 from "@/assets/movie-poster-1.jpg";
 import moviePoster2 from "@/assets/movie-poster-2.jpg";
 import moviePoster3 from "@/assets/movie-poster-3.jpg";
+import axios from "axios";
+
+import { useEffect, useState } from "react";
+
 
 const Movies = () => {
+  const url='http://localhost:8004/movie/getmovie'
   const navigate = useNavigate();
+ const [Movielist, setMovielist] = useState({
+  title: "movie title",
+  cast: { hero: "hero", heroine: "", villain: "", supportArtists: [] },
+  crew: { director: "", producer: "", musicDirector: "", cinematographer: "" },
+  photos: [],
+  showTimings: [],
+  ticketPrice: { kids: 0, adults: 0 },
+  bookingOpenDays: 3,
+});
+
+
+
+  const fetchdata=async()=>{
+      try {
+      const response = await axios.get(url);
+      let data = response.data.data; // Use 'let' if you want to reassign
+      if(!data===undefined){
+        const lastMovie = data[data.length - 1]; // Get the last object
+        console.log(lastMovie); // Use the last movie object
+        setMovielist(lastMovie);
+      }
+      
+    } catch (error) {
+      console.log('Movie fetch error', error);
+    }
+  }
+  
+  useEffect(()=>{
+     fetchdata();
+  },[])
+  // const posters = Movielist.photos && Movielist.photos.length > 0
+  // ? Movielist.photos.map((photo, index) => ({
+  //     id: index + 1,
+  //     image: `http://localhost:8004/${photo}`, // your backend URL
+  //     title: Movielist.title || `Movie ${index + 1}`,
+  //   }))
+  // : [
+  //     {
+  //       id: 1,
+  //       image: defaultPoster,
+  //       title: Movielist.title || "Default Movie",
+  //     }
+  //   ];
+
+
 
   const posters = [
-    { id: 1, image: moviePoster1, title: "Tamil Cinema Experience" },
+    { id: 1, image: moviePoster1, title: Movielist.title||"movie title"},
     { id: 2, image: moviePoster2, title: "Latest Blockbuster" },
     { id: 3, image: moviePoster3, title: "Classic Tamil Films" },
   ];
 
-  const castMembers = [
-    { id: 1, name: "Lead Actor", role: "Hero" },
-    { id: 2, name: "Lead Actress", role: "Heroine" },
-    { id: 3, name: "Supporting Actor", role: "Villain" },
-    { id: 4, name: "Character Artist", role: "Comic" },
-  ];
+const castMembers = [
+  { id: 1, name: Movielist.cast?.hero || "Hero Name", role: "Hero" },
+  { id: 2, name: Movielist.cast?.heroine || "Heroine Name", role: "Heroine" },
+  { id: 3, name: Movielist.cast?.villain || "Villain Name", role: "Villain" },
+  { id: 4, name: Movielist.cast?.supportArtists?.join(", ") || "Support Artists", role: "Comic" },
+];
+
 
   const crewMembers = [
-    { id: 1, name: "Director", role: "Direction" },
-    { id: 2, name: "Music Director", role: "Music" },
-    { id: 3, name: "Cinematographer", role: "Cinematography" },
-    { id: 4, name: "Producer", role: "Production" },
+    { id: 1, name:Movielist.crew?.director|| "Director", role: "Direction" },
+    { id: 2, name:Movielist.crew?.musicDirector|| "Music Director", role: "Music" },
+    { id: 3, name:Movielist.crew?.cinematographer|| "Cinematographer", role: "Cinematography" },
+    { id: 4, name:Movielist.crew?.producer|| "Producer", role: "Production" },
   ];
 
   const prices = [

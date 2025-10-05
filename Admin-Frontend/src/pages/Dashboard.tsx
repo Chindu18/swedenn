@@ -1,159 +1,138 @@
+import React, { useState } from "react";
 import { IndianRupee, Users, TrendingUp, Clock } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import MovieCarousel from "@/components/MovieCarousel";
 
-const currentMovieBookings = [
-  { name: "Ramesh Krishnan", email: "ramesh@email.com", seats: 4, status: "Paid", amount: 400 },
-  { name: "Pooja Reddy", email: "pooja@email.com", seats: 2, status: "Paid", amount: 200 },
-  { name: "Suresh Babu", email: "suresh@email.com", seats: 3, status: "Pending", amount: 300 },
-  { name: "Kavitha Menon", email: "kavitha@email.com", seats: 5, status: "Paid", amount: 500 },
-  { name: "Ganesh Iyer", email: "ganesh@email.com", seats: 2, status: "Pending", amount: 200 },
-  { name: "Shreya Patel", email: "shreya@email.com", seats: 4, status: "Paid", amount: 400 },
+const currentMovieBookingsData = [
+  { bookingId: "BKG-001", name: "Ramesh Krishnan", email: "ramesh@email.com", seats: 4, status: "Paid", amount: 400, show: { date: "2025-10-06", time: "10:00 AM" } },
+  { bookingId: "BKG-002", name: "Pooja Reddy", email: "pooja@email.com", seats: 2, status: "Paid", amount: 200, show: { date: "2025-10-06", time: "2:00 PM" } },
+  { bookingId: "BKG-003", name: "Suresh Babu", email: "suresh@email.com", seats: 3, status: "Pending", amount: 300, show: { date: "2025-10-06", time: "6:00 PM" } },
+  { bookingId: "BKG-004", name: "Kavitha Menon", email: "kavitha@email.com", seats: 5, status: "Paid", amount: 500, show: { date: "2025-10-06", time: "9:30 PM" } },
+  { bookingId: "BKG-005", name: "Ganesh Iyer", email: "ganesh@email.com", seats: 2, status: "Pending", amount: 200, show: { date: "2025-10-07", time: "10:00 AM" } },
+  { bookingId: "BKG-006", name: "Shreya Patel", email: "shreya@email.com", seats: 4, status: "Paid", amount: 400, show: { date: "2025-10-07", time: "2:00 PM" } },
 ];
 
-const totalCollected = currentMovieBookings
-  .filter(b => b.status === "Paid")
-  .reduce((sum, b) => sum + b.amount, 0);
-
-const totalPending = currentMovieBookings
-  .filter(b => b.status === "Pending")
-  .reduce((sum, b) => sum + b.amount, 0);
-
 const Dashboard = () => {
+  const [bookings, setBookings] = useState(currentMovieBookingsData);
+  const [showModal, setShowModal] = useState(false);
+  const [pendingToggle, setPendingToggle] = useState(null); // store index of booking to toggle
+
+  const totalCollected = bookings.filter(b => b.status === "Paid").reduce((sum, b) => sum + b.amount, 0);
+  const totalPending = bookings.filter(b => b.status === "Pending").reduce((sum, b) => sum + b.amount, 0);
+
+  // Only trigger modal if the booking is Pending
+  const requestToggleStatus = (index) => {
+    if (bookings[index].status === "Pending") {
+      setPendingToggle(index);
+      setShowModal(true);
+    }
+  };
+
+  // Confirm toggle to Paid
+  const confirmToggleStatus = () => {
+    if (pendingToggle !== null) {
+      setBookings(prev => {
+        const newBookings = [...prev];
+        newBookings[pendingToggle].status = "Paid"; // Only change to Paid
+        return newBookings;
+      });
+    }
+    setPendingToggle(null);
+    setShowModal(false);
+  };
+
+  const cancelToggleStatus = () => {
+    setPendingToggle(null);
+    setShowModal(false);
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8 space-y-8">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-red-700 bg-clip-text text-transparent">
-              Dashboard
-            </h1>
-            <p className="text-muted-foreground mt-1">Welcome back, Admin</p>
-          </div>
-        </div>
+        <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-red-700 bg-clip-text text-transparent">Dashboard</h1>
 
+        {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Card className="shadow-md hover:shadow-lg transition-shadow border-l-4 border-l-primary">
-            <CardContent className="p-6">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Total Members</p>
-                  <p className="text-3xl font-bold mt-2">5,600</p>
-                </div>
-                <div className="p-3 bg-blue-100 rounded-lg">
-                  <Users className="h-6 w-6 text-blue-600" />
-                </div>
+            <CardContent className="p-6 flex justify-between items-center">
+              <div>
+                <p className="text-sm text-muted-foreground">Total Members</p>
+                <p className="text-3xl font-bold mt-2">5,600</p>
               </div>
+              <Users className="h-6 w-6 text-blue-600" />
             </CardContent>
           </Card>
-
           <Card className="shadow-md hover:shadow-lg transition-shadow border-l-4 border-l-green-500">
-            <CardContent className="p-6">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Collected</p>
-                  <p className="text-3xl font-bold mt-2 flex items-center gap-1">
-                    <IndianRupee className="h-6 w-6" />
-                    85,500
-                  </p>
-                </div>
-                <div className="p-3 bg-green-100 rounded-lg">
-                  <TrendingUp className="h-6 w-6 text-green-600" />
-                </div>
+            <CardContent className="p-6 flex justify-between items-center">
+              <div>
+                <p className="text-sm text-muted-foreground">Collected</p>
+                <p className="text-3xl font-bold mt-2 flex items-center gap-1">
+                  <IndianRupee className="h-6 w-6" /> {totalCollected}
+                </p>
               </div>
+              <TrendingUp className="h-6 w-6 text-green-600" />
             </CardContent>
           </Card>
-
           <Card className="shadow-md hover:shadow-lg transition-shadow border-l-4 border-l-orange-500">
-            <CardContent className="p-6">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Pending</p>
-                  <p className="text-3xl font-bold mt-2 flex items-center gap-1">
-                    <IndianRupee className="h-6 w-6" />
-                    29,000
-                  </p>
-                </div>
-                <div className="p-3 bg-orange-100 rounded-lg">
-                  <Clock className="h-6 w-6 text-orange-600" />
-                </div>
+            <CardContent className="p-6 flex justify-between items-center">
+              <div>
+                <p className="text-sm text-muted-foreground">Pending</p>
+                <p className="text-3xl font-bold mt-2 flex items-center gap-1">
+                  <IndianRupee className="h-6 w-6" /> {totalPending}
+                </p>
               </div>
+              <Clock className="h-6 w-6 text-orange-600" />
             </CardContent>
           </Card>
-
-          <Card className="shadow-md hover:shadow-lg transition-shadow border-l-4 border-l-purple-500">
-            <CardContent className="p-6">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Total Shows</p>
-                  <p className="text-3xl font-bold mt-2">28</p>
-                </div>
-                <div className="p-3 bg-purple-100 rounded-lg">
-                  <TrendingUp className="h-6 w-6 text-purple-600" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <Card className="shadow-md hover:shadow-lg transition-shadow border-l-4 border-l-purple-500"> <CardContent className="p-6"> <div className="flex items-start justify-between"> <div> <p className="text-sm text-muted-foreground">Total Shows</p> <p className="text-3xl font-bold mt-2">28</p> </div> <div className="p-3 bg-purple-100 rounded-lg"> <TrendingUp className="h-6 w-6 text-purple-600" /> </div> </div> </CardContent> </Card>
         </div>
 
-        
-
-        {/* <Card className="shadow-lg">
+        {/* Bookings Table */}
+        <Card className="shadow-lg">
           <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold bg-gradient-to-r from-primary to-red-700 bg-clip-text text-transparent">
-                Current Movie Bookings
-              </h2>
-              <div className="flex gap-4">
-                <div className="text-right">
-                  <p className="text-sm text-muted-foreground">Collected</p>
-                  <p className="text-lg font-bold text-green-600 flex items-center gap-1">
-                    <IndianRupee className="h-4 w-4" />
-                    {totalCollected}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <p className="text-sm text-muted-foreground">Pending</p>
-                  <p className="text-lg font-bold text-orange-600 flex items-center gap-1">
-                    <IndianRupee className="h-4 w-4" />
-                    {totalPending}
-                  </p>
-                </div>
-              </div>
-            </div>
-
+            <h2 className="text-2xl font-bold bg-gradient-to-r from-primary to-red-700 bg-clip-text text-transparent mb-4">Current Movie Bookings</h2>
             <div className="border rounded-lg overflow-hidden">
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead>Booking ID</TableHead>
                     <TableHead>Member Name</TableHead>
                     <TableHead>Email</TableHead>
-                    <TableHead className="text-center">Seats Booked</TableHead>
+                    <TableHead className="text-center">Seats</TableHead>
+                    <TableHead>Show</TableHead>
                     <TableHead className="text-center">Payment Status</TableHead>
                     <TableHead className="text-right">Amount</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {currentMovieBookings.map((booking, index) => (
-                    <TableRow key={index}>
-                      <TableCell className="font-medium">{booking.name}</TableCell>
-                      <TableCell>{booking.email}</TableCell>
-                      <TableCell className="text-center">{booking.seats}</TableCell>
+                  {bookings.map((b, i) => (
+                    <TableRow key={b.bookingId}>
+                      <TableCell>{b.bookingId}</TableCell>
+                      <TableCell>{b.name}</TableCell>
+                      <TableCell>{b.email}</TableCell>
+                      <TableCell className="text-center">{b.seats}</TableCell>
+                      <TableCell>
+                        {b.show.date} <br />
+                        <span className="text-sm text-muted-foreground">{b.show.time}</span>
+                      </TableCell>
                       <TableCell className="text-center">
-                        <span
-                          className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                            booking.status === "Paid"
-                              ? "bg-green-100 text-green-700"
-                              : "bg-orange-100 text-orange-700"
-                          }`}
+                        <button
+                          onClick={() => requestToggleStatus(i)}
+                          disabled={b.status === "Paid"} // disable Paid bookings
+                          className={`relative inline-flex items-center h-6 w-16 rounded-full transition-colors duration-300 focus:outline-none ${b.status === "Paid" ? "bg-green-500 cursor-not-allowed" : "bg-orange-500"
+                            }`}
                         >
-                          {booking.status}
-                        </span>
+                          <span
+                            className={`absolute left-1 top-1 w-4 h-4 rounded-full bg-white transition-transform duration-300 ${b.status === "Paid" ? "translate-x-10" : "translate-x-0"
+                              }`}
+                          ></span>
+                          <span className="absolute inset-0 flex items-center justify-center text-xs font-semibold text-white pointer-events-none">
+                            {b.status}
+                          </span>
+                        </button>
                       </TableCell>
                       <TableCell className="text-right font-semibold flex items-center justify-end gap-1">
-                        <IndianRupee className="h-4 w-4" />
-                        {booking.amount}
+                        <IndianRupee className="h-4 w-4" /> {b.amount}
                       </TableCell>
                     </TableRow>
                   ))}
@@ -161,116 +140,30 @@ const Dashboard = () => {
               </Table>
             </div>
           </CardContent>
-        </Card> */}
-        <Card className="shadow-lg">
-  <CardContent className="p-6">
-    <div className="flex items-center justify-between mb-6">
-      <h2 className="text-2xl font-bold bg-gradient-to-r from-primary to-red-700 bg-clip-text text-transparent">
-        Current Movie Bookings
-      </h2>
-      <div className="flex gap-4">
-        <div className="text-right">
-          <p className="text-sm text-muted-foreground">Collected</p>
-          <p className="text-lg font-bold text-green-600 flex items-center gap-1">
-            <IndianRupee className="h-4 w-4" />
-            {totalCollected}
-          </p>
-        </div>
-        <div className="text-right">
-          <p className="text-sm text-muted-foreground">Pending</p>
-          <p className="text-lg font-bold text-orange-600 flex items-center gap-1">
-            <IndianRupee className="h-4 w-4" />
-            {totalPending}
-          </p>
-        </div>
-      </div>
-    </div>
+        </Card>
 
-   {/* --- New Movie Filter Section --- */}
-<div className="flex flex-wrap gap-4 mb-6 items-center bg-gray-50 dark:bg-gray-800 p-4 rounded-lg shadow-sm">
-  {/* Movie Name */}
-  <div className="flex flex-col w-40">
-    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Movie Name</label>
-    <input
-      type="text"
-      value="Idli Kadai"
-      readOnly
-      className="mt-1 rounded-md border border-gray-300 dark:border-gray-600 px-2 py-1 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
-    />
-  </div>
-
-  {/* Booking ID */}
-  <div className="flex flex-col w-40">
-    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Booking ID</label>
-    <input
-      type="text"
-      placeholder="Enter Booking ID"
-      className="mt-1 rounded-md border border-gray-300 dark:border-gray-600 px-2 py-1 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
-    />
-  </div>
-
-  {/* Payment Status */}
-  <div className="flex flex-col w-40">
-    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Payment Status</label>
-    <select
-      className="mt-1 rounded-md border border-gray-300 dark:border-gray-600 px-2 py-1 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
-    >
-      <option value="">All</option>
-      <option value="paid">Paid</option>
-      <option value="pending">Pending</option>
-    </select>
-  </div>
-</div>
-
-
-
-    <div className="border rounded-lg overflow-hidden">
-  <Table>
-    <TableHeader>
-      <TableRow>
-        <TableHead>Booking ID</TableHead>
-        <TableHead>Member Name</TableHead>
-        <TableHead>Email</TableHead>
-        <TableHead className="text-center">Seats Booked</TableHead>
-        <TableHead>Show</TableHead>
-        <TableHead>Booking Date</TableHead>
-        <TableHead className="text-center">Payment Status</TableHead>
-        <TableHead className="text-right">Amount</TableHead>
-      </TableRow>
-    </TableHeader>
-    <TableBody>
-      {currentMovieBookings.map((booking, index) => (
-        <TableRow key={index}>
-          <TableCell className="font-medium">{booking.bookingId}</TableCell>
-          <TableCell className="font-medium">{booking.name}</TableCell>
-          <TableCell>{booking.email}</TableCell>
-          <TableCell className="text-center">{booking.seats}</TableCell>
-          <TableCell>{booking.show}</TableCell>
-          <TableCell>{new Date(booking.date).toLocaleDateString()}</TableCell>
-          <TableCell className="text-center">
-            <span
-              className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                booking.status === "Paid"
-                  ? "bg-green-100 text-green-700"
-                  : "bg-orange-100 text-orange-700"
-              }`}
-            >
-              {booking.status}
-            </span>
-          </TableCell>
-          <TableCell className="text-right font-semibold flex items-center justify-end gap-1">
-            <IndianRupee className="h-4 w-4" />
-            {booking.amount}
-          </TableCell>
-        </TableRow>
-      ))}
-    </TableBody>
-  </Table>
-</div>
-
-  </CardContent>
-</Card>
-
+        {/* Confirmation Modal */}
+        {showModal && (
+          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+            <div className="bg-white p-6 rounded-lg shadow-lg text-center">
+              <p className="mb-4">Are you sure you want to change this booking to Paid?</p>
+              <div className="flex justify-center gap-4">
+                <button
+                  onClick={confirmToggleStatus}
+                  className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                >
+                  Yes
+                </button>
+                <button
+                  onClick={cancelToggleStatus}
+                  className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+                >
+                  No
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

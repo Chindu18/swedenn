@@ -1,61 +1,63 @@
 
-
 import { useState } from "react";
 import { useEffect } from "react";
 import axios from "axios";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { QRCodeSVG } from "qrcode.react";
 import { toast } from "@/hooks/use-toast";
-import { Calendar, Clock, Users, Ticket, CreditCard } from "lucide-react";
-import { time } from "console";
+import { Users, Ticket, CreditCard, Film } from "lucide-react";
 
 interface BookingData {
-  date: string;
-  timing: string;
   seatNumbers: number[];
   adult: number;
   kids: number;
   ticketType: string;
   totalAmount: number;
 }
-
+interface Show {
+  id: number;
+  date: string;
+  time: string;
+}
 const BookTicket = () => {
+  const [selectedShowId, setSelectedShowId] = useState<number | null>(null);
+
+  const shows: Show[] = [
+    { id: 1, date: "2025-10-06", time: "10:00 AM" },
+    { id: 2, date: "2025-10-06", time: "2:00 PM" },
+    { id: 3, date: "2025-10-06", time: "6:00 PM" },
+    { id: 4, date: "2025-10-06", time: "9:30 PM" },
+  ];
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [date, setDate] = useState("");
-  const [timing, setTiming] = useState("");
   const [adult, setAdult] = useState(0);
   const [kids, setKids] = useState(0);
   const [ticketType, setTicketType] = useState<string>(""); 
   const [selectedSeats, setSelectedSeats] = useState<number[]>([]);
   const [bookedSeats, setBookedSeats] = useState<number[]>([]);
+
+// 👉 Add below here
+useEffect(() => {
+  if (ticketType) {
+    setAdult(0);
+    setKids(0);
+    setSelectedSeats([]);
+  }
+}, [ticketType]);
+  
   const [showQRModal, setShowQRModal] = useState(false);
   const [bookingData, setBookingData] = useState<BookingData | null>(null);
 
 
-   useEffect(() => {
-    if (!date || !timing) return; // only fetch if date & timing are selected
-    console.log(date)
-    console.log(timing)
-    axios.get(`http://localhost:8004/api/bookedSeats?date=${date}&timing=${timing}`)
-      .then(res => setBookedSeats(res.data)) // array of seat numbers
-      .catch(err => console.log(err));
-  }, [date, timing]);
+  
 
-  const timings = ["10:00 AM", "2:00 PM", "6:00 PM", "9:30 PM"];
   const totalSeatsSelected = adult + kids;
 
+  // ------------------- Seat Selection -------------------
   const handleSeatClick = (seatNumber: number) => {
     if (bookedSeats.includes(seatNumber)) {
       toast({
@@ -88,11 +90,9 @@ const BookTicket = () => {
 
   const calculateTotal = () => adult * 100 + kids * 80;
 
-  // -------------------
-  // Handle Booking with Axios
-  // -------------------
+  // ------------------- Handle Booking -------------------
   const handleBooking = async () => {
-    if (!name || !email || !date || !timing || selectedSeats.length !== totalSeatsSelected || !ticketType) {
+    if (!name || !email || selectedSeats.length !== totalSeatsSelected || !ticketType) {
       toast({
         title: "Missing Information",
         description: "Please fill all fields and select seats equal to Adult + Kids count.",
@@ -103,8 +103,6 @@ const BookTicket = () => {
 
     const totalAmount = calculateTotal();
     const booking: BookingData = {
-      date,
-      timing,
       seatNumbers: selectedSeats,
       adult,
       kids,
@@ -134,8 +132,6 @@ const BookTicket = () => {
       // Reset form
       setName("");
       setEmail("");
-      setDate("");
-      setTiming("");
       setAdult(0);
       setKids(0);
       setTicketType("");
@@ -150,9 +146,7 @@ const BookTicket = () => {
     }
   };
 
-  // -------------------
-  // Seat Layout Rendering
-  // -------------------
+  // ------------------- Seat Layout -------------------
   const seatLayoutSets = [
     [19, 19, 21, 21, 21, 21, 21, 21], // Rows 1-8
     [19, 19, 19, 19, 19, 19, 19],     // Rows 9-15
@@ -160,6 +154,10 @@ const BookTicket = () => {
   ];
 
   let currentSeatNumber = 1;
+
+ 
+
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-muted/30 to-background py-12">
@@ -176,7 +174,7 @@ const BookTicket = () => {
             {/* Booking Details */}
             <Card className="border-2 border-border hover:border-accent/50 transition-colors shadow-xl animate-slide-up">
               <CardHeader className="bg-gradient-to-r from-accent to-accent/80 text-white">
-                <CardTitle className="text-3xl flex items-center gap-3">
+                <CardTitle className="text-3xl flex items-center gap-3 tracking-[2px]">
                   <Ticket className="w-8 h-8" /> Booking Details
                 </CardTitle>
               </CardHeader>
@@ -196,35 +194,32 @@ const BookTicket = () => {
                     placeholder="Enter your email" className="text-lg p-6 border-2 focus:border-accent" />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="date" className="text-lg flex items-center gap-2">
-                    <Calendar className="w-5 h-5 text-accent" /> Date
-                  </Label>
-                  <Input id="date" type="date" value={date} onChange={(e) => setDate(e.target.value)}
-                    className="text-lg p-6 border-2 focus:border-accent" />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="timing" className="text-lg flex items-center gap-2">
-                    <Clock className="w-5 h-5 text-accent" /> Timing
-                  </Label>
-                  <Select value={timing} onValueChange={setTiming}>
-                    <SelectTrigger className="text-lg p-6 border-2 focus:border-accent">
-                      <SelectValue placeholder="Select timing" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {timings.map((time) => (
-                        <SelectItem key={time} value={time} className="text-lg">{time}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+      <Label className="text-lg flex items-center gap-2">
+        <Film className="w-5 h-5 text-accent" /> Shows
+      </Label>
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+        {shows.map((show) => (
+          <button
+            key={show.id}
+            type="button"
+            onClick={() => setSelectedShowId(show.id)}
+            className={`border rounded-lg p-3 text-center cursor-pointer transition-all
+              ${selectedShowId === show.id ? "bg-accent text-white border-accent" : "bg-background border-border hover:border-accent "}`}
+          >
+            <p className="font-semibold">{show.time}</p>
+            <p className="text-sm ">{show.date}</p>
+          </button>
+        ))}
+      </div>
+    </div>
               </CardContent>
             </Card>
 
             {/* Ticket Types */}
             <Card className="border-2 border-border hover:border-accent/50 transition-colors shadow-xl animate-slide-up">
               <CardHeader className="bg-gradient-to-r from-secondary to-cinema-black text-white">
-                <CardTitle className="text-3xl flex items-center gap-3">
-                  <CreditCard className="w-8 h-8" /> Ticket Types
+                <CardTitle className="text-3xl flex items-center gap-3 tracking-[2px]">
+                  <CreditCard className="w-8 h-8" /> PAYMENT METHOD
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-6 space-y-4">
@@ -312,7 +307,7 @@ const BookTicket = () => {
                       <div key={`set${setIndex}-${rowIndex}`} className="flex flex-col items-center">
                         <div className="flex gap-1 items-center justify-center w-full">
                           <span className="text-xs text-muted-foreground font-bold w-8 text-right mr-2">
-                            {currentSeatNumber} {/* Just label, can adjust */}
+                            {currentSeatNumber}
                           </span>
                           {Array.from({ length: maxCols }, (_, seatIndex) => {
                             if (seatIndex < Math.floor((maxCols - cols) / 2) || seatIndex >= Math.floor((maxCols - cols) / 2) + cols) {
@@ -357,8 +352,6 @@ const BookTicket = () => {
                   <QRCodeSVG value={JSON.stringify(bookingData)} size={220} level="H" includeMargin={true} />
                 </div>
                 <div className="text-center space-y-3 w-full bg-muted/30 p-6 rounded-xl">
-                  <p className="text-sm text-muted-foreground"><span className="font-semibold text-foreground text-lg">Date:</span> {bookingData.date}</p>
-                  <p className="text-sm text-muted-foreground"><span className="font-semibold text-foreground text-lg">Time:</span> {bookingData.timing}</p>
                   <p className="text-sm text-muted-foreground"><span className="font-semibold text-foreground text-lg">Seats:</span> {bookingData.seatNumbers.join(", ")}</p>
                   <p className="text-2xl font-bold text-accent pt-3 border-t-2 border-accent/20">Total: ₹{bookingData.totalAmount}</p>
                   <p className="text-xs text-muted-foreground mt-6 bg-accent/10 p-3 rounded-lg">✉️ Confirmation email sent successfully!</p>

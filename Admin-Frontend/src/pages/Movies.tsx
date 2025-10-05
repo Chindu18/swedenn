@@ -1,69 +1,89 @@
 // import { useState } from "react";
 // import { IndianRupee, X } from "lucide-react";
 // import { Card, CardContent } from "@/components/ui/card";
-// import axios from 'axios'
+// import axios from "axios";
+
+// interface Cast {
+//   actor: string;
+//   actress: string;
+//   villan: string;
+//   supporting: string;
+// }
+
+// interface Crew {
+//   director: string;
+//   producer: string;
+//   musicDirector: string;
+//   cinematographer: string;
+// }
+
+// interface ShowPrices {
+//   adult: string;
+//   kids: string;
+// }
+
+// interface Show {
+//   time: string;
+//   prices: {
+//     online: ShowPrices;
+//     videoSpeed: ShowPrices;
+//     soder: ShowPrices;
+//   };
+//   date?: string; // optional if you want
+// }
+
+// interface Movie {
+//   id: number;
+//   title: string;
+//   cast: Cast;
+//   crew: Crew;
+//   posters: File[]; // actual files
+//   shows: Show[];
+// }
 
 // const Movies = () => {
-//   const [movies, setMovies] = useState([]);
+//   const [movies, setMovies] = useState<Movie[]>([]);
 //   const [showForm, setShowForm] = useState(false);
-//   const [modalMovie, setModalMovie] = useState(null);
+//   const [modalMovie, setModalMovie] = useState<Movie | null>(null);
 
-//   const initialFormData = {
+//   const initialFormData: Omit<Movie, "id"> = {
 //     title: "",
 //     cast: { actor: "", actress: "", villan: "", supporting: "" },
 //     crew: { director: "", producer: "", musicDirector: "", cinematographer: "" },
 //     posters: [],
-//     shows: [], // array of { time, prices: { online: {adult,kids}, videoSpeed:{}, soder:{} } }
+//     shows: [],
 //   };
 
 //   const [formData, setFormData] = useState(initialFormData);
+//   const [posterPreviews, setPosterPreviews] = useState<string[]>([]);
 
-//   // General input change
-// // Submit form
-// const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-//   e.preventDefault();
-
-//   try {
-//     // send POST request
-//     const res = await axios.post(
-//       "http://localhost:8080/api/addDetails",
-//       formData, // this will send your JSON body
-//       {
-//         headers: { "Content-Type": "application/json" },
-//       }
-//     );
-
-//     // Optionally handle response
-//     console.log("Saved movie:", res.data);
-
-//     // Update local state as before
-//     const newMovie = { id: Date.now(), ...formData };
-//     setMovies((prev) => {
-//       const updated = [...prev, newMovie];
-//       if (updated.length > 5) updated.shift();
-//       return updated;
-//     });
-
-//     // Reset form
-//     setFormData(initialFormData);
-//     setShowForm(false);
-//   } catch (err) {
-//     console.error("Error saving movie:", err);
-//     alert("Something went wrong saving movie");
-//   }
-// };
-
-
-
-//   // Poster upload (max 3) with preview
-//   const handlePosterUpload = (e) => {
-//     const files = Array.from(e.target.files)
-//       .slice(0, 3)
-//       .map((file) => URL.createObjectURL(files));
-//     setFormData({ ...formData, posters: files });
+//   // ---------------------- Input Handlers ----------------------
+//   const handleChange = (
+//     e: React.ChangeEvent<HTMLInputElement>,
+//     section?: keyof Omit<Movie, "id" | "title" | "posters" | "shows">,
+//     key?: string
+//   ) => {
+//     const { value, name } = e.target;
+//     if (section && key) {
+//       setFormData({
+//         ...formData,
+//         [section]: { ...formData[section], [key]: value },
+//       });
+//     } else {
+//       setFormData({ ...formData, [name]: value });
+//     }
 //   };
 
-//   // Add show dynamically
+//   // ---------------------- Poster Upload ----------------------
+//   const handlePosterUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+//     const files = Array.from(e.target.files ?? []).slice(0, 3);
+//     setFormData({ ...formData, posters: files });
+
+//     const previews = files.map((file) => URL.createObjectURL(file));
+//     setPosterPreviews(previews);
+//   };
+
+//   // ---------------------- Add Show ----------------------
 //   const addShow = () => {
 //     setFormData({
 //       ...formData,
@@ -81,37 +101,76 @@
 //     });
 //   };
 
-//   const handleShowChange = (index, field, method, type, value) => {
-//     // Only allow numeric input for price
-//     if (type && /\D/.test(value)) return;
-
+//   const handleShowChange = (
+//     index: number,
+//     field: "time" | "prices",
+//     method: keyof Show["prices"] | null,
+//     type: keyof ShowPrices | null,
+//     value: string
+//   ) => {
+//     if (type && /\D/.test(value)) return; // numeric only
 //     const shows = [...formData.shows];
 //     if (field === "time") {
 //       shows[index].time = value;
-//     } else {
+//     } else if (method && type) {
 //       shows[index].prices[method][type] = value;
 //     }
 //     setFormData({ ...formData, shows });
 //   };
 
-//   // Submit form
-//   const handleSubmit = (e) => {
+//   // ---------------------- Submit Form ----------------------
+//   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 //     e.preventDefault();
-//     const newMovie = { id: Date.now(), ...formData };
-//     setMovies((prev) => {
-//       const updated = [...prev, newMovie];
-//       if (updated.length > 5) updated.shift(); // Keep max 5 movies
-//       return updated;
-//     });
-//     setFormData(initialFormData);
-//     setShowForm(false);
+
+//     try {
+//       const data = new FormData();
+
+//       // Add individual fields for backend
+//       data.append("title", formData.title);
+
+//       data.append("hero", formData.cast.actor);
+//       data.append("heroine", formData.cast.actress);
+//       data.append("villain", formData.cast.villan);
+//       data.append("supportArtists", formData.cast.supporting);
+
+//       data.append("director", formData.crew.director);
+//       data.append("producer", formData.crew.producer);
+//       data.append("musicDirector", formData.crew.musicDirector);
+//       data.append("cinematographer", formData.crew.cinematographer);
+
+//       // Add show timings as JSON
+//       data.append("showTimings", JSON.stringify(formData.shows));
+
+//       // Add poster files
+//       formData.posters.forEach((file) => data.append("photos", file));
+
+//       const res = await axios.post("http://localhost:8004/api/addDetails", data, {
+//         headers: { "Content-Type": "multipart/form-data" },
+//       });
+
+//       console.log("Saved movie:", res.data);
+
+//       const newMovie = { id: Date.now(), ...formData };
+//       setMovies((prev) => {
+//         const updated = [...prev, newMovie];
+//         if (updated.length > 5) updated.shift();
+//         return updated;
+//       });
+
+//       setFormData(initialFormData);
+//       setPosterPreviews([]);
+//       setShowForm(false);
+//     } catch (err) {
+//       console.error("Error saving movie:", err);
+//       alert("Something went wrong saving movie");
+//     }
 //   };
 
+//   // ---------------------- JSX ----------------------
 //   return (
 //     <div className="min-h-screen bg-background p-8">
 //       <h1 className="text-4xl font-bold mb-4">Movies Collection</h1>
 
-//       {/* Add Movie Button */}
 //       <button
 //         className="bg-blue-600 text-white px-4 py-2 rounded mb-6"
 //         onClick={() => setShowForm(!showForm)}
@@ -119,10 +178,9 @@
 //         {showForm ? "Close Form" : "Add Movie"}
 //       </button>
 
-//       {/* Movie Form */}
 //       {showForm && (
 //         <form className="mb-6 max-w-3xl p-6 border rounded shadow space-y-4" onSubmit={handleSubmit}>
-//           {/* Movie Title */}
+//           {/* Title */}
 //           <input
 //             type="text"
 //             name="title"
@@ -133,53 +191,50 @@
 //             className="border p-2 w-full rounded"
 //           />
 
-//           {/* Cast Section */}
+//           {/* Cast */}
 //           <div>
 //             <label className="font-semibold">Cast:</label>
-//             {["actor", "actress", "villan", "supporting"].map((role) => (
+//             {Object.keys(formData.cast).map((role) => (
 //               <input
 //                 key={role}
 //                 type="text"
 //                 placeholder={role.charAt(0).toUpperCase() + role.slice(1)}
-//                 value={formData.cast[role]}
+//                 value={formData.cast[role as keyof Cast]}
 //                 onChange={(e) => handleChange(e, "cast", role)}
+//                 required
 //                 className="border p-2 w-full rounded mb-2"
 //               />
 //             ))}
 //           </div>
 
-//           {/* Crew Section */}
+//           {/* Crew */}
 //           <div>
 //             <label className="font-semibold">Crew:</label>
-//             {["director", "producer", "musicDirector", "cinematographer"].map((role) => (
+//             {Object.keys(formData.crew).map((role) => (
 //               <input
 //                 key={role}
 //                 type="text"
 //                 placeholder={role.replace(/([A-Z])/g, " $1")}
-//                 value={formData.crew[role]}
+//                 value={formData.crew[role as keyof Crew]}
 //                 onChange={(e) => handleChange(e, "crew", role)}
+//                 required
 //                 className="border p-2 w-full rounded mb-2"
 //               />
 //             ))}
 //           </div>
 
-//           {/* Poster Upload */}
+//           {/* Posters */}
 //           <div>
 //             <label className="font-semibold">Posters (3 max):</label>
 //             <input type="file" multiple accept="image/*" onChange={handlePosterUpload} />
 //             <div className="flex gap-2 mt-2">
-//               {formData.posters.map((src, idx) => (
-//                 <img
-//                   key={idx}
-//                   src={src}
-//                   alt={`Poster ${idx + 1}`}
-//                   className="w-24 h-24 object-cover border rounded"
-//                 />
+//               {posterPreviews.map((src, idx) => (
+//                 <img key={idx} src={src} alt={`Poster ${idx + 1}`} className="w-24 h-24 object-cover border rounded" />
 //               ))}
 //             </div>
 //           </div>
 
-//           {/* Shows Section */}
+//           {/* Shows */}
 //           <div>
 //             <label className="font-semibold">Shows:</label>
 //             {formData.shows.map((show, idx) => (
@@ -192,25 +247,21 @@
 //                   className="border p-2 w-full rounded"
 //                 />
 //                 <div className="grid grid-cols-3 gap-2">
-//                   {["online", "videoSpeed", "soder"].map((method) => (
+//                   {(["online", "videoSpeed", "soder"] as const).map((method) => (
 //                     <div key={method} className="border p-2 rounded space-y-1">
 //                       <p className="font-medium">{method}</p>
 //                       <input
 //                         type="text"
 //                         placeholder="Adult Price"
 //                         value={show.prices[method].adult}
-//                         onChange={(e) =>
-//                           handleShowChange(idx, "prices", method, "adult", e.target.value)
-//                         }
+//                         onChange={(e) => handleShowChange(idx, "prices", method, "adult", e.target.value)}
 //                         className="border p-1 w-full rounded"
 //                       />
 //                       <input
 //                         type="text"
 //                         placeholder="Kids Price"
 //                         value={show.prices[method].kids}
-//                         onChange={(e) =>
-//                           handleShowChange(idx, "prices", method, "kids", e.target.value)
-//                         }
+//                         onChange={(e) => handleShowChange(idx, "prices", method, "kids", e.target.value)}
 //                         className="border p-1 w-full rounded"
 //                       />
 //                     </div>
@@ -218,11 +269,7 @@
 //                 </div>
 //               </div>
 //             ))}
-//             <button
-//               type="button"
-//               className="bg-gray-300 text-black px-2 py-1 rounded"
-//               onClick={addShow}
-//             >
+//             <button type="button" className="bg-gray-300 text-black px-2 py-1 rounded" onClick={addShow}>
 //               + Add Show
 //             </button>
 //           </div>
@@ -235,26 +282,27 @@
 
 //       {/* Movie Cards */}
 //       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-//         {movies.map((movie) => {
-          
-//           return (
-//             <Card
-//               key={movie.id}
-//               className="cursor-pointer hover:shadow-lg"
-//               onClick={() => setModalMovie(movie)}
-//             >
-//               <img
-//                 src={movie.posters[0]}
-//                 alt={movie.title}
-//                 className="w-full h-64 object-cover"
-//               />
-//               <CardContent className="flex justify-between p-3">
-//                 <span>Paid: <IndianRupee className="h-4 w-4 inline" /> 0</span>
-//                 <span>Pending: <IndianRupee className="h-4 w-4 inline" /> 0</span>
-//               </CardContent>
-//             </Card>
-//           );
-//         })}
+//         {movies.map((movie) => (
+//           <Card key={movie.id} className="cursor-pointer hover:shadow-lg" onClick={() => setModalMovie(movie)}>
+//             <img
+//               src={
+//                 movie.posters[0] instanceof File
+//                   ? URL.createObjectURL(movie.posters[0])
+//                   : `http://localhost:8004/${movie.posters[0]}`
+//               }
+//               alt={movie.title}
+//               className="w-full h-64 object-cover"
+//             />
+//             <CardContent className="flex justify-between p-3">
+//               <span>
+//                 Paid: <IndianRupee className="h-4 w-4 inline" /> 0
+//               </span>
+//               <span>
+//                 Pending: <IndianRupee className="h-4 w-4 inline" /> 0
+//               </span>
+//             </CardContent>
+//           </Card>
+//         ))}
 //       </div>
 
 //       {/* Modal */}
@@ -265,13 +313,21 @@
 //               <X />
 //             </button>
 //             <h2 className="text-2xl font-bold mb-4">{modalMovie.title}</h2>
-//             <p className="mb-2"><strong>Cast:</strong> {Object.values(modalMovie.cast).join(", ")}</p>
-//             <p className="mb-2"><strong>Crew:</strong> {Object.values(modalMovie.crew).join(", ")}</p>
-//             <p className="mb-2"><strong>Shows:</strong></p>
+//             <p className="mb-2">
+//               <strong>Cast:</strong> {Object.values(modalMovie.cast).join(", ")}
+//             </p>
+//             <p className="mb-2">
+//               <strong>Crew:</strong> {Object.values(modalMovie.crew).join(", ")}
+//             </p>
+//             <p className="mb-2">
+//               <strong>Shows:</strong>
+//             </p>
 //             <ul className="list-disc pl-5">
 //               {modalMovie.shows.map((show, idx) => (
 //                 <li key={idx}>
-//                   {show.time} - Online: {show.prices.online.adult}/{show.prices.online.kids}, Video: {show.prices.videoSpeed.adult}/{show.prices.videoSpeed.kids}, Soder: {show.prices.soder.adult}/{show.prices.soder.kids}
+//                   {show.time} - Online: {show.prices.online.adult}/{show.prices.online.kids}, Video:{" "}
+//                   {show.prices.videoSpeed.adult}/{show.prices.videoSpeed.kids}, Soder:{" "}
+//                   {show.prices.soder.adult}/{show.prices.soder.kids}
 //                 </li>
 //               ))}
 //             </ul>
@@ -283,6 +339,9 @@
 // };
 
 // export default Movies;
+
+
+
 import { useState } from "react";
 import { IndianRupee, X } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -308,13 +367,13 @@ interface ShowPrices {
 }
 
 interface Show {
+  date: string;
   time: string;
   prices: {
     online: ShowPrices;
     videoSpeed: ShowPrices;
     soder: ShowPrices;
   };
-  date?: string; // optional if you want
 }
 
 interface Movie {
@@ -322,7 +381,7 @@ interface Movie {
   title: string;
   cast: Cast;
   crew: Crew;
-  posters: File[]; // actual files
+  posters: File[] | string[]; // can be File objects or URLs
   shows: Show[];
 }
 
@@ -375,6 +434,7 @@ const Movies = () => {
       shows: [
         ...formData.shows,
         {
+          date: "",
           time: "",
           prices: {
             online: { adult: "", kids: "" },
@@ -388,16 +448,18 @@ const Movies = () => {
 
   const handleShowChange = (
     index: number,
-    field: "time" | "prices",
+    field: "date" | "time" | "prices",
     method: keyof Show["prices"] | null,
     type: keyof ShowPrices | null,
     value: string
   ) => {
-    if (type && /\D/.test(value)) return; // numeric only
     const shows = [...formData.shows];
     if (field === "time") {
       shows[index].time = value;
-    } else if (method && type) {
+    } else if (field === "date") {
+      shows[index].date = value;
+    } else if (field === "prices" && method && type) {
+      if (/\D/.test(value)) return; // numeric only
       shows[index].prices[method][type] = value;
     }
     setFormData({ ...formData, shows });
@@ -524,13 +586,26 @@ const Movies = () => {
             <label className="font-semibold">Shows:</label>
             {formData.shows.map((show, idx) => (
               <div key={idx} className="border p-3 rounded mb-3 space-y-2">
+                {/* Date Input */}
+                <input
+                  type="date"
+                  value={show.date}
+                  onChange={(e) => handleShowChange(idx, "date", null, null, e.target.value)}
+                  className="border p-2 w-full rounded"
+                  required
+                />
+
+                {/* Time Input */}
                 <input
                   type="text"
                   placeholder="Show Time (e.g., 2:00 PM)"
                   value={show.time}
                   onChange={(e) => handleShowChange(idx, "time", null, null, e.target.value)}
                   className="border p-2 w-full rounded"
+                  required
                 />
+
+                {/* Prices */}
                 <div className="grid grid-cols-3 gap-2">
                   {(["online", "videoSpeed", "soder"] as const).map((method) => (
                     <div key={method} className="border p-2 rounded space-y-1">
@@ -610,7 +685,7 @@ const Movies = () => {
             <ul className="list-disc pl-5">
               {modalMovie.shows.map((show, idx) => (
                 <li key={idx}>
-                  {show.time} - Online: {show.prices.online.adult}/{show.prices.online.kids}, Video:{" "}
+                  {show.date} - {show.time} - Online: {show.prices.online.adult}/{show.prices.online.kids}, Video:{" "}
                   {show.prices.videoSpeed.adult}/{show.prices.videoSpeed.kids}, Soder:{" "}
                   {show.prices.soder.adult}/{show.prices.soder.kids}
                 </li>
