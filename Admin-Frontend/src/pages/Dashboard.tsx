@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { IndianRupee, Users, TrendingUp, Clock } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import axios from "axios";
 
 const currentMovieBookingsData = [
   { bookingId: "BKG-001", name: "Ramesh Krishnan", email: "ramesh@email.com", seats: 4, status: "Paid", amount: 400, show: { date: "2025-10-06", time: "10:00 AM" } },
@@ -46,6 +47,22 @@ const Dashboard = () => {
     setShowModal(false);
   };
 
+
+  //for total seats or tatal member setas booking
+  const [totalSeats, setTotalSeats] = useState(0);
+  useEffect(()=>{
+    const fetchSeats=async()=>{
+      try {
+        let response=await axios.get("http://localhost:8004/dashboard/seats");
+        setTotalSeats(response.data.totalSeats);
+      } catch (error) {
+        console.log(error.message)
+      }
+    }
+    fetchSeats();
+  },[])
+  
+
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8 space-y-8">
@@ -57,7 +74,7 @@ const Dashboard = () => {
             <CardContent className="p-6 flex justify-between items-center">
               <div>
                 <p className="text-sm text-muted-foreground">Total Members</p>
-                <p className="text-3xl font-bold mt-2">5,600</p>
+                <p className="text-3xl font-bold mt-2">{totalSeats}</p>
               </div>
               <Users className="h-6 w-6 text-blue-600" />
             </CardContent>

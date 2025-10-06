@@ -12,6 +12,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 import path from 'path';
+import dashboardRouter from './Routes/dashboard.js';
 
 // Serve the uploads folder inside movies
 app.use('/uploads', express.static(path.join(process.cwd(), 'uploads/movies')));
@@ -21,8 +22,8 @@ app.use('/uploads', express.static(path.join(process.cwd(), 'uploads/movies')));
 
 // Mount main router
 app.use('/api', userRouter);
-app.use('/movie',movieRouter)
-
+app.use('/movie',movieRouter);
+app.use('/dashboard',dashboardRouter);
 // Root test
 app.get("/", (req, res) => res.send("Backend server running"));
 

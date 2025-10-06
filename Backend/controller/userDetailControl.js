@@ -4,6 +4,10 @@ import Movie from "../Models/Movies.js";
 
 
 // Add a booking
+// Controllers/yourController.js
+
+import { v4 as uuidv4 } from 'uuid'; 
+
 export const addBooking = async (req, res) => {
   try {
     const { date, timing, seatNumbers } = req.body;
@@ -17,15 +21,27 @@ export const addBooking = async (req, res) => {
       return res.status(400).json({ message: "Some seats are already booked", success: false });
     }
 
-    // Save booking
-    const booking = new Booking(req.body);
+    // 👇 generate a bookingId here
+    const bookingId = "BKG-" +  uuidv4().split("-")[0];
+
+    // Save booking with bookingId
+    const booking = new Booking({
+      ...req.body,
+      bookingId
+    });
     await booking.save();
-    res.status(201).json({ message: "Booking saved successfully", success: true });
+
+    res.status(201).json({ 
+      message: "Booking saved successfully",
+      success: true,
+      bookingId 
+    });
   } catch (error) {
     console.error("Error occurred:", error);
     res.status(500).json({ message: error.message, success: false });
   }
 };
+
 
 // Get booked seats for a date & timing
 export const getBookedSeats = async (req, res) => {

@@ -18,6 +18,7 @@ interface BookingData {
   kids: number;
   ticketType: string;
   totalAmount: number;
+  totalSeats: number;
 }
 
 interface Show {
@@ -121,7 +122,9 @@ const BookTicket = () => {
   };
 
   const ticketPrice = getTicketPrice(ticketType);
-  const totalSeatsSelected = adult + kids;
+  let totalSeatsSelected = adult + kids;
+  totalSeatsSelected=Number(totalSeatsSelected);
+  console.log("Total Seats Selected:", totalSeatsSelected);
   const calculateTotal = () => adult * ticketPrice.adult + kids * ticketPrice.kids;
 
   // -------------------- Seat Selection --------------------
@@ -158,7 +161,9 @@ const BookTicket = () => {
       return;
     }
 
-    const booking: BookingData = { seatNumbers: selectedSeats, adult, kids, ticketType, totalAmount: calculateTotal() };
+   //payment status
+   const paymentStatus='pending';
+    const booking: BookingData = { seatNumbers: selectedSeats,paymentStatus, adult,totalSeatsSelected, kids, ticketType, totalAmount: calculateTotal() };
 
     try {
       const response = await axios.post("http://localhost:8004/api/addBooking", {
