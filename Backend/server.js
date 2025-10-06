@@ -4,13 +4,18 @@ import database_connection from './DataBase/db.js';
 import userRouter from './Routes/user.js';
 import movieRouter from './Routes/movie.js';
 
+
 const app = express();
 const port = 8004;
 
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use('/uploads', express.static('uploads'));
+import path from 'path';
+
+// Serve the uploads folder inside movies
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads/movies')));
+
 
 
 

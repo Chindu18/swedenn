@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const bookingSchema = new mongoose.Schema({
+const BookingSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true },
   date: { type: String, required: true },
@@ -9,9 +9,7 @@ const bookingSchema = new mongoose.Schema({
   adult: { type: Number, required: true },
   kids: { type: Number, required: true },
   ticketType: { type: String, required: true },
-  totalAmount: { type: Number, required: true },
+  totalAmount: { type: Number, required: true }
 }, { timestamps: true });
 
-const Booking = mongoose.models.Booking || mongoose.model("Booking", bookingSchema);
-
-export default Booking;
+export default mongoose.model("Booking", BookingSchema);

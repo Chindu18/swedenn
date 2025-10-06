@@ -1,6 +1,7 @@
 
-import { useState } from "react";
-import { useEffect } from "react";
+
+
+import { useState, useEffect } from "react";
 import axios from "axios";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,53 +19,115 @@ interface BookingData {
   ticketType: string;
   totalAmount: number;
 }
+
 interface Show {
-  id: number;
   date: string;
   time: string;
+  prices: {
+    online: { adult: number; kids: number };
+    videoSpeed: { adult: number; kids: number };
+    soder: { adult: number; kids: number };
+  };
 }
-const BookTicket = () => {
-  const [selectedShowId, setSelectedShowId] = useState<number | null>(null);
 
-  const shows: Show[] = [
-    { id: 1, date: "2025-10-06", time: "10:00 AM" },
-    { id: 2, date: "2025-10-06", time: "2:00 PM" },
-    { id: 3, date: "2025-10-06", time: "6:00 PM" },
-    { id: 4, date: "2025-10-06", time: "9:30 PM" },
-  ];
+interface Movie {
+  title: string;
+  cast: { hero: string; heroine: string; villain: string; supportArtists: string[] };
+  crew: { director: string; producer: string; musicDirector: string; cinematographer: string };
+  photos: string[];
+  shows: Show[];
+  bookingOpenDays: number;
+}
+
+const BookTicket = () => {
+  // -------------------- State --------------------
+  const [movie, setMovie] = useState<Movie>({
+    title: "",
+    cast: { hero: "", heroine: "", villain: "", supportArtists: [] },
+    crew: { director: "", producer: "", musicDirector: "", cinematographer: "" },
+    photos: [],
+    shows: [],
+    bookingOpenDays: 3,
+  });
+
+  const [selectedShowId, setSelectedShowId] = useState<number | null>(null);
+  const [selectedSeats, setSelectedSeats] = useState<number[]>([]);
+  const [bookedSeats, setBookedSeats] = useState<number[]>([]);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [adult, setAdult] = useState(0);
   const [kids, setKids] = useState(0);
-  const [ticketType, setTicketType] = useState<string>(""); 
-  const [selectedSeats, setSelectedSeats] = useState<number[]>([]);
-  const [bookedSeats, setBookedSeats] = useState<number[]>([]);
+  const [ticketType, setTicketType] = useState<string>("");
+  const [bookingData, setBookingData] = useState<BookingData | null>(null);
+  const [showQRModal, setShowQRModal] = useState(false);
 
-// 👉 Add below here
-useEffect(() => {
-  if (ticketType) {
+  const [selectedDate, setSelectedDate] = useState("");
+  const [selectedTime, setSelectedTime] = useState("");
+
+  // -------------------- Fetch Movie --------------------
+  useEffect(() => {
+    const fetchMovie = async () => {
+      try {
+        const response = await axios.get("http://localhost:8004/movie/getmovie");
+        const data = response.data.data;
+        if (data && data.length > 0) {
+          const lastMovie = data[data.length - 1];
+          setMovie(lastMovie);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchMovie();
+  }, []);
+
+  //----------------------fetch sets --------------
+  
+  
+   useEffect(() => {
+  if (!selectedDate || !selectedTime) return; // only fetch if date & timing are selected
+  console.log("Selected Date:", selectedDate);
+  console.log("Selected Time:", selectedTime);
+
+  axios.get(`http://localhost:8004/api/bookedSeats`, {
+    params: { date: selectedDate, timing: selectedTime }
+  })
+  .then(res => setBookedSeats(res.data.data)) // <-- access data array
+  .catch(err => console.log(err));
+}, [selectedDate, selectedTime]);
+
+
+
+
+  // -------------------- Reset Seats on Ticket Type Change --------------------
+  useEffect(() => {
     setAdult(0);
     setKids(0);
     setSelectedSeats([]);
-  }
-}, [ticketType]);
-  
-  const [showQRModal, setShowQRModal] = useState(false);
-  const [bookingData, setBookingData] = useState<BookingData | null>(null);
+  }, [ticketType]);
 
+  // -------------------- Get Selected Show --------------------
+  const selectedShow = movie.shows?.find(
+    (s) => s.date === selectedDate && s.time === selectedTime
+  );
 
-  
+  // -------------------- Get Dynamic Ticket Price --------------------
+  const getTicketPrice = (type: string) => {
+    if (!selectedShow) return { adult: 0, kids: 0 };
+    if (type === "online") return selectedShow.prices.online;
+    if (type === "video") return selectedShow.prices.videoSpeed;
+    if (type === "sodertalije") return selectedShow.prices.soder;
+    return { adult: 0, kids: 0 };
+  };
 
+  const ticketPrice = getTicketPrice(ticketType);
   const totalSeatsSelected = adult + kids;
+  const calculateTotal = () => adult * ticketPrice.adult + kids * ticketPrice.kids;
 
-  // ------------------- Seat Selection -------------------
+  // -------------------- Seat Selection --------------------
   const handleSeatClick = (seatNumber: number) => {
     if (bookedSeats.includes(seatNumber)) {
-      toast({
-        title: "Seat Unavailable",
-        description: "This seat is already booked.",
-        variant: "destructive",
-      });
+      toast({ title: "Seat Unavailable", description: "This seat is already booked.", variant: "destructive" });
       return;
     }
     if (selectedSeats.includes(seatNumber)) {
@@ -73,7 +136,7 @@ useEffect(() => {
       if (selectedSeats.length >= totalSeatsSelected) {
         toast({
           title: "Maximum Seats Selected",
-          description: `You can only select ${totalSeatsSelected} seat(s) based on Adult + Kids count.`,
+          description: `You can only select ${totalSeatsSelected} seat(s).`,
           variant: "destructive",
         });
         return;
@@ -88,48 +151,30 @@ useEffect(() => {
     return "bg-seat-unselected";
   };
 
-  const calculateTotal = () => adult * 100 + kids * 80;
-
-  // ------------------- Handle Booking -------------------
+  // -------------------- Booking --------------------
   const handleBooking = async () => {
-    if (!name || !email || selectedSeats.length !== totalSeatsSelected || !ticketType) {
-      toast({
-        title: "Missing Information",
-        description: "Please fill all fields and select seats equal to Adult + Kids count.",
-        variant: "destructive",
-      });
+    if (!name || !email || selectedSeats.length !== totalSeatsSelected || !ticketType || !selectedShow) {
+      toast({ title: "Missing Information", description: "Please fill all fields and select seats.", variant: "destructive" });
       return;
     }
 
-    const totalAmount = calculateTotal();
-    const booking: BookingData = {
-      seatNumbers: selectedSeats,
-      adult,
-      kids,
-      ticketType,
-      totalAmount,
-    };
+    const booking: BookingData = { seatNumbers: selectedSeats, adult, kids, ticketType, totalAmount: calculateTotal() };
 
     try {
-      // Send booking data to backend
       const response = await axios.post("http://localhost:8004/api/addBooking", {
         name,
         email,
+        date: selectedShow.date,
+        timing: selectedShow.time,
         ...booking,
       });
 
-      // On success
-      console.log("Booking Response:", response.data);
       setBookedSeats([...bookedSeats, ...selectedSeats]);
       setBookingData(booking);
       setShowQRModal(true);
 
-      toast({
-        title: "Booking Successful!",
-        description: "Your ticket has been booked. Check your email for confirmation.",
-      });
+      toast({ title: "Booking Successful!", description: "Your ticket has been booked." });
 
-      // Reset form
       setName("");
       setEmail("");
       setAdult(0);
@@ -137,28 +182,20 @@ useEffect(() => {
       setTicketType("");
       setSelectedSeats([]);
     } catch (error: any) {
-      console.error("Booking Error:", error);
-      toast({
-        title: "Booking Failed",
-        description: error.response?.data?.message || "Something went wrong",
-        variant: "destructive",
-      });
+      toast({ title: "Booking Failed", description: error.response?.data?.message || "Something went wrong", variant: "destructive" });
+      console.log(error)
     }
   };
 
-  // ------------------- Seat Layout -------------------
+  // -------------------- Seat Layout --------------------
   const seatLayoutSets = [
-    [19, 19, 21, 21, 21, 21, 21, 21], // Rows 1-8
-    [19, 19, 19, 19, 19, 19, 19],     // Rows 9-15
-    [7],                              // Row 18
+    [19, 19, 21, 21, 21, 21, 21, 21],
+    [19, 19, 19, 19, 19, 19, 19],
+    [7],
   ];
-
   let currentSeatNumber = 1;
 
- 
-
-
-
+  // -------------------- JSX --------------------
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-muted/30 to-background py-12">
       <div className="container mx-auto px-4 max-w-7xl">
@@ -183,39 +220,41 @@ useEffect(() => {
                   <Label htmlFor="name" className="text-lg flex items-center gap-2">
                     <Users className="w-5 h-5 text-accent" /> Name
                   </Label>
-                  <Input id="name" type="text" value={name} onChange={(e) => setName(e.target.value)}
-                    placeholder="Enter your name" className="text-lg p-6 border-2 focus:border-accent" />
+                  <Input id="name" type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Enter your name" className="text-lg p-6 border-2 focus:border-accent" />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="email" className="text-lg flex items-center gap-2">
                     <CreditCard className="w-5 h-5 text-accent" /> Email
                   </Label>
-                  <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Enter your email" className="text-lg p-6 border-2 focus:border-accent" />
+                  <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Enter your email" className="text-lg p-6 border-2 focus:border-accent" />
                 </div>
                 <div className="space-y-2">
-      <Label className="text-lg flex items-center gap-2">
-        <Film className="w-5 h-5 text-accent" /> Shows
-      </Label>
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-        {shows.map((show) => (
-          <button
-            key={show.id}
-            type="button"
-            onClick={() => setSelectedShowId(show.id)}
-            className={`border rounded-lg p-3 text-center cursor-pointer transition-all
-              ${selectedShowId === show.id ? "bg-accent text-white border-accent" : "bg-background border-border hover:border-accent "}`}
-          >
-            <p className="font-semibold">{show.time}</p>
-            <p className="text-sm ">{show.date}</p>
-          </button>
-        ))}
-      </div>
-    </div>
+                  <Label className="text-lg flex items-center gap-2">
+                    <Film className="w-5 h-5 text-accent" /> Shows
+                  </Label>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    {movie.shows?.map((show, index) => (
+                      <button
+                        key={index}
+                        type="button"
+                        onClick={() => {
+                          setSelectedShowId(index);
+                          setSelectedDate(show.date);
+                          setSelectedTime(show.time);
+                        }}
+                        className={`border rounded-lg p-3 text-center cursor-pointer transition-all
+                          ${selectedShowId === index ? "bg-accent text-white border-accent" : "bg-background border-border hover:border-accent"}`}
+                      >
+                        <p className="font-semibold">{show.time}</p>
+                        <p className="text-sm">{show.date}</p>
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </CardContent>
             </Card>
 
-            {/* Ticket Types */}
+            {/* Payment Card */}
             <Card className="border-2 border-border hover:border-accent/50 transition-colors shadow-xl animate-slide-up">
               <CardHeader className="bg-gradient-to-r from-secondary to-cinema-black text-white">
                 <CardTitle className="text-3xl flex items-center gap-3 tracking-[2px]">
@@ -225,10 +264,12 @@ useEffect(() => {
               <CardContent className="p-6 space-y-4">
                 <div className="flex gap-4 mb-6">
                   {["online", "video", "sodertalije"].map((type) => (
-                    <button key={type} onClick={() => setTicketType(type)}
+                    <button
+                      key={type}
+                      onClick={() => setTicketType(type)}
                       className={`px-6 py-3 rounded-lg font-semibold text-lg border-2 transition-all duration-200
-                        ${ticketType === type ? "bg-accent text-white border-accent" :
-                        "bg-background border-border hover:border-accent"}`}>
+                        ${ticketType === type ? "bg-accent text-white border-accent" : "bg-background border-border hover:border-accent"}`}
+                    >
                       {type === "online" ? "Online Payment" : type === "video" ? "Video Speed" : "Sodertalije"}
                     </button>
                   ))}
@@ -237,7 +278,7 @@ useEffect(() => {
                 {ticketType && (
                   <div className="space-y-4 border-2 border-border rounded-lg p-6">
                     <div className="flex justify-between items-center">
-                      <Label className="text-lg font-semibold">Adult (₹100)</Label>
+                      <Label className="text-lg font-semibold">Adult (₹{ticketPrice.adult})</Label>
                       <div className="flex items-center gap-2">
                         <button onClick={() => setAdult(Math.max(adult - 1, 0))} className="px-3 py-1 bg-gray-200 rounded">-</button>
                         <span className="w-8 text-center">{adult}</span>
@@ -245,7 +286,7 @@ useEffect(() => {
                       </div>
                     </div>
                     <div className="flex justify-between items-center">
-                      <Label className="text-lg font-semibold">Kids (₹80)</Label>
+                      <Label className="text-lg font-semibold">Kids (₹{ticketPrice.kids})</Label>
                       <div className="flex items-center gap-2">
                         <button onClick={() => setKids(Math.max(kids - 1, 0))} className="px-3 py-1 bg-gray-200 rounded">-</button>
                         <span className="w-8 text-center">{kids}</span>
@@ -264,7 +305,7 @@ useEffect(() => {
               </CardContent>
             </Card>
 
-            {/* Selected Seats */}
+            {/* Selected Seats Card */}
             <Card className="border-2 border-accent shadow-xl animate-slide-up">
               <CardContent className="p-6">
                 <Label className="text-foreground text-lg font-semibold mb-3 block">Selected Seats</Label>
@@ -282,9 +323,13 @@ useEffect(() => {
               </CardContent>
             </Card>
 
-            <Button onClick={handleBooking}
+            <Button
+              onClick={handleBooking}
               className="w-full bg-accent hover:bg-accent/90 text-white font-bold text-2xl py-8 rounded-xl shadow-2xl cinema-glow hover:scale-105 transition-all duration-300"
-              size="lg">Book Now</Button>
+              size="lg"
+            >
+              Book Now
+            </Button>
           </div>
 
           {/* Seat Layout */}
@@ -299,16 +344,13 @@ useEffect(() => {
                   <p className="text-center text-lg font-bold text-foreground tracking-wider">THIS IS THE SCREEN</p>
                 </div>
 
-                {/* Seats Grid */}
                 <div className="space-y-2 overflow-auto max-h-[700px] px-2">
                   {seatLayoutSets.map((set, setIndex) => {
                     const maxCols = Math.max(...set);
                     return set.map((cols, rowIndex) => (
                       <div key={`set${setIndex}-${rowIndex}`} className="flex flex-col items-center">
                         <div className="flex gap-1 items-center justify-center w-full">
-                          <span className="text-xs text-muted-foreground font-bold w-8 text-right mr-2">
-                            {currentSeatNumber}
-                          </span>
+                          <span className="text-xs text-muted-foreground font-bold w-8 text-right mr-2">{currentSeatNumber}</span>
                           {Array.from({ length: maxCols }, (_, seatIndex) => {
                             if (seatIndex < Math.floor((maxCols - cols) / 2) || seatIndex >= Math.floor((maxCols - cols) / 2) + cols) {
                               return <div key={`empty-${setIndex}-${rowIndex}-${seatIndex}`} className="w-8 h-8" />;
@@ -353,11 +395,12 @@ useEffect(() => {
                 </div>
                 <div className="text-center space-y-3 w-full bg-muted/30 p-6 rounded-xl">
                   <p className="text-sm text-muted-foreground"><span className="font-semibold text-foreground text-lg">Seats:</span> {bookingData.seatNumbers.join(", ")}</p>
-                  <p className="text-2xl font-bold text-accent pt-3 border-t-2 border-accent/20">Total: ₹{bookingData.totalAmount}</p>
-                  <p className="text-xs text-muted-foreground mt-6 bg-accent/10 p-3 rounded-lg">✉️ Confirmation email sent successfully!</p>
+                  <p className="text-2xl font-bold text-accent">₹{bookingData.totalAmount}</p>
+                  <p className="text-sm text-muted-foreground">Show: {selectedShow?.date} {selectedShow?.time}</p>
                 </div>
               </>
             )}
+            <Button onClick={() => setShowQRModal(false)} className="w-full bg-accent hover:bg-accent/90 text-white font-bold py-4 rounded-lg">Close</Button>
           </div>
         </DialogContent>
       </Dialog>

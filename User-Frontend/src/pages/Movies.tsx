@@ -34,13 +34,15 @@ const Movies = () => {
 
   const fetchdata=async()=>{
       try {
-      const response = await axios.get(url);
+        console.log('working')
+        const response = await axios.get('http://localhost:8004/movie/getmovie');
       let data = response.data.data; // Use 'let' if you want to reassign
-      if(!data===undefined){
-        const lastMovie = data[data.length - 1]; // Get the last object
-        console.log(lastMovie); // Use the last movie object
+          if (data !== undefined && data.length > 0) {
+        const lastMovie = data[data.length - 1];
+        console.log(lastMovie)
         setMovielist(lastMovie);
       }
+
       
     } catch (error) {
       console.log('Movie fetch error', error);
@@ -50,33 +52,33 @@ const Movies = () => {
   useEffect(()=>{
      fetchdata();
   },[])
-  // const posters = Movielist.photos && Movielist.photos.length > 0
-  // ? Movielist.photos.map((photo, index) => ({
-  //     id: index + 1,
-  //     image: `http://localhost:8004/${photo}`, // your backend URL
-  //     title: Movielist.title || `Movie ${index + 1}`,
-  //   }))
-  // : [
-  //     {
-  //       id: 1,
-  //       image: defaultPoster,
-  //       title: Movielist.title || "Default Movie",
-  //     }
-  //   ];
+  
+
+const posters = Movielist.posters && Movielist.posters.length > 0
+  ? Movielist.posters.map((photo, index) => ({
+      id: index + 1,
+      image: `http://localhost:8004/uploads/${photo}`, // full backend path
+      title: Movielist.title || `Movie ${index + 1}`,
+    }))
+  : [
+      { id: 1, image: moviePoster1, title: Movielist.title || "Default Movie" },
+      { id: 2, image: moviePoster2, title: "Latest Blockbuster" },
+      { id: 3, image: moviePoster3, title: "Classic Tamil Films" },
+    ];
 
 
 
-  const posters = [
-    { id: 1, image: moviePoster1, title: Movielist.title||"movie title"},
-    { id: 2, image: moviePoster2, title: "Latest Blockbuster" },
-    { id: 3, image: moviePoster3, title: "Classic Tamil Films" },
-  ];
+
+
+
+
+
 
 const castMembers = [
-  { id: 1, name: Movielist.cast?.hero || "Hero Name", role: "Hero" },
-  { id: 2, name: Movielist.cast?.heroine || "Heroine Name", role: "Heroine" },
-  { id: 3, name: Movielist.cast?.villain || "Villain Name", role: "Villain" },
-  { id: 4, name: Movielist.cast?.supportArtists?.join(", ") || "Support Artists", role: "Comic" },
+  { id: 1, name: Movielist.cast?.actor || "Hero Name", role: "Hero" },
+  { id: 2, name: Movielist.cast?.actress || "Heroine Name", role: "Heroine" },
+  { id: 3, name: Movielist.cast?.villan || "Villain Name", role: "Villain" },
+  { id: 4, name: Movielist.cast?.supporting|| "Support Artists", role: "Comic" },
 ];
 
 
@@ -116,12 +118,12 @@ const castMembers = [
                       <img
                         src={poster.image}
                         alt={poster.title}
-                        className="w-full h-[70vh] object-cover transform group-hover:scale-105 transition-transform duration-700"
+                        className="w-full h-[100vh] object-cover transform group-hover:scale-105 transition-transform duration-700"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
                       <div className="absolute bottom-0 left-0 right-0 p-8 text-white">
                         <h3 className="text-4xl md:text-5xl font-bold mb-2">{poster.title}</h3>
-                        <p className="text-lg text-white/80">Experience Cinema Like Never Before</p>
+                        <p className="text-lg text-white/80">Sweden’s Home for Tamil Cinema</p>
                       </div>
                     </div>
                   </div>
@@ -201,14 +203,14 @@ const castMembers = [
         <div className="container mx-auto px-4 max-w-6xl relative z-10">
           <div className="text-center mb-16">
             <h2 className="text-5xl md:text-6xl font-bold mb-4">
-              Showtime & Pricing
+              Discount & Contact
             </h2>
             <div className="w-32 h-1 bg-accent mx-auto rounded-full"></div>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-8 mb-12">
+          {/* <div className="grid md:grid-cols-2 gap-8 mb-12"> */}
             {/* Show Timings */}
-            <Card className="bg-white/5 backdrop-blur-md border-white/10 hover-lift">
+            {/* <Card className="bg-white/5 backdrop-blur-md border-white/10 hover-lift">
               <CardContent className="p-8">
                 <div className="flex items-center gap-3 mb-6">
                   <Clock className="w-8 h-8 text-accent" />
@@ -227,10 +229,10 @@ const castMembers = [
                   ))}
                 </div>
               </CardContent>
-            </Card>
+            </Card> */}
 
             {/* Ticket Prices */}
-            <Card className="bg-white/5 backdrop-blur-md border-white/10 hover-lift">
+            {/* <Card className="bg-white/5 backdrop-blur-md border-white/10 hover-lift">
               <CardContent className="p-8">
                 <div className="flex items-center gap-3 mb-6">
                   <Ticket className="w-8 h-8 text-accent" />
@@ -252,9 +254,22 @@ const castMembers = [
                   ))}
                 </div>
               </CardContent>
-            </Card>
-          </div>
+            </Card> */}
+          {/* </div> */}
 
+          
+
+          
+          {/* Book Button */}
+          <div className="text-center mb-12">
+            <Button
+              onClick={() => navigate("/book-ticket")}
+              className="bg-accent hover:bg-accent/90 text-white font-bold text-2xl py-8 px-16 rounded-full cinema-glow hover:scale-105 transition-all duration-300 shadow-2xl"
+              size="lg"
+            >
+              Book Ticket Now
+            </Button>
+          </div>
           {/* Discount Banner */}
           <Card className="bg-gradient-to-r from-accent to-accent/80 border-accent cinema-glow mb-12 overflow-hidden relative">
             <div className="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
@@ -268,9 +283,8 @@ const castMembers = [
               </div>
             </CardContent>
           </Card>
-
           {/* Location & Contact */}
-          <div className="grid md:grid-cols-2 gap-8 mb-12">
+          <div className="grid md:grid-cols-2 gap-8 ">
             <Card className="bg-white/5 backdrop-blur-md border-white/10 hover-lift">
               <CardContent className="p-8">
                 <div className="flex items-center gap-3 mb-4">
@@ -303,16 +317,6 @@ const castMembers = [
             </Card>
           </div>
 
-          {/* Book Button */}
-          <div className="text-center">
-            <Button
-              onClick={() => navigate("/book-ticket")}
-              className="bg-accent hover:bg-accent/90 text-white font-bold text-2xl py-8 px-16 rounded-full cinema-glow hover:scale-105 transition-all duration-300 shadow-2xl"
-              size="lg"
-            >
-              Book Ticket Now
-            </Button>
-          </div>
         </div>
       </section>
     </div>
@@ -320,3 +324,6 @@ const castMembers = [
 };
 
 export default Movies;
+
+
+

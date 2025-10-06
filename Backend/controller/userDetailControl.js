@@ -33,7 +33,10 @@ export const getBookedSeats = async (req, res) => {
   try {
     const bookings = await Booking.find({ date, timing });
     const seats = bookings.flatMap(b => b.seatNumbers);
-    res.json(seats);
+    res.json({success:true,
+      message:"fetchehed seat successfully",
+      data:seats
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -53,74 +56,50 @@ const storage = multer.diskStorage({
 export const upload = multer({ storage });
 
 // ---------------------- Add Movie Controller ----------------------
+
+
+// POST /api/addDetails
 export const addMovie = async (req, res) => {
   try {
-    // Validate uploaded files
-    const photoPaths = req.files?.map(file => file.path) || [];
+    const { title, hero, heroine, villain, supportArtists, director, producer, musicDirector, cinematographer, showTimings } = req.body;
 
-    // Extract individual fields from Postman
-    const {
-      title = "",
-      bookingOpenDays = 3,
-      kidsPrice = 0,
-      adultsPrice = 0,
-      hero = "",
-      heroine = "",
-      villain = "",
-      supportArtists = "",
-      director = "",
-      producer = "",
-      musicDirector = "",
-      cinematographer = "",
-    } = req.body;
+    // Multer will give files in req.files
+    const posters = req.files?.map(file => file.filename) || [];
 
-    if (!title) return res.status(400).json({ message: "Movie title is required" });
+    // Parse showTimings JSON from frontend
+    const shows = showTimings ? JSON.parse(showTimings) : [];
 
-    // Transform support artists (comma separated string to array)
-    const cast = {
-      hero,
-      heroine,
-      villain,
-      supportArtists: supportArtists ? supportArtists.split(",").map(s => s.trim()) : [],
-    };
-
-    const crew = { director, producer, musicDirector, cinematographer };
-
-    const ticketPrice = {
-      kids: Number(kidsPrice),
-      adults: Number(adultsPrice),
-    };
-
-    // Transform show timings (individual inputs: show1Date, show1Time, show2Date...)
-    const showTimings = [];
-    Object.keys(req.body)
-      .filter(key => key.startsWith("show"))
-      .forEach(key => {
-        if (key.endsWith("Date")) {
-          const idx = key.replace("show", "").replace("Date", "");
-          const timeKey = `show${idx}Time`;
-          showTimings.push({
-            date: new Date(req.body[key]),
-            time: req.body[timeKey] || "00:00",
-          });
-        }
-      });
-
-    // Save movie
     const movie = new Movie({
       title,
-      cast,
-      crew,
-      photos: photoPaths,
-      showTimings,
-      ticketPrice,
-      bookingOpenDays: Number(bookingOpenDays),
+      cast: {
+        actor: hero,
+        actress: heroine,
+        villan: villain,
+        supporting: supportArtists,
+      },
+      crew: {
+        director,
+        producer,
+        musicDirector,
+        cinematographer,
+      },
+      posters,
+      shows,
     });
 
-    await movie.save();
-    res.status(201).json({ message: "Movie added successfully", movie });
+    const savedMovie = await movie.save();
+
+    res.status(201).json({
+      success: true,
+      message: "Movie added successfully",
+      data: savedMovie,
+    });
   } catch (error) {
-    console.error("Add movie error:", error);
-    res.status(500).json({ message: "Failed to add movie", error: error.message });
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: `Error occurred: ${error.message}`,
+    });
   }
 };
+
