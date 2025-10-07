@@ -58,7 +58,7 @@ const Movies = () => {
 const posters = Movielist.posters && Movielist.posters.length > 0
   ? Movielist.posters.map((photo, index) => ({
       id: index + 1,
-      image: `${backend_url}/uploads/${photo}`, // full backend path
+      image: `${backend_url}/uploads/${photo}`, // ✅ full backend path
       title: Movielist.title || `Movie ${index + 1}`,
     }))
   : [
