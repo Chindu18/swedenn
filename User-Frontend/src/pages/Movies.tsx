@@ -19,7 +19,7 @@ import { useEffect, useState } from "react";
 
 const Movies = () => {
   const backend_url='https://swedenn-backend.onrender.com'
-  const url='http://localhost:8004/movie/getmovie'
+ 
   const navigate = useNavigate();
  const [Movielist, setMovielist] = useState({
   title: "movie title",
@@ -58,7 +58,7 @@ const Movies = () => {
 const posters = Movielist.posters && Movielist.posters.length > 0
   ? Movielist.posters.map((photo, index) => ({
       id: index + 1,
-      image: `http://localhost:8004/uploads/${photo}`, // full backend path
+      image: `${backend_url}/uploads/${photo}`, // full backend path
       title: Movielist.title || `Movie ${index + 1}`,
     }))
   : [
