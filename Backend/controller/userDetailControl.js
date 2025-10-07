@@ -22,21 +22,7 @@ export const addBooking = async (req, res) => {
     }
 
     // 👇 generate a bookingId here
-   
-export async function generateBookingId() {
-  let bookingId;
-  let exists = true;
-
-  while (exists) {
-    // Generate short, random 5-character ID
-    bookingId = "BKG-" + uuidv4().replace(/-/g, "").substring(0, 5).toUpperCase();
-
-    // Check in database if already exists
-    exists = await Booking.exists({ bookingId });
-  }
-
-  return bookingId;
-}
+    const bookingId = "BKG-" +  uuidv4().split("-")[0];
 
     // Save booking with bookingId
     const booking = new Booking({
@@ -91,10 +77,20 @@ export const upload = multer({ storage });
 // POST /api/addDetails
 export const addMovie = async (req, res) => {
   try {
-    const { title, hero, heroine, villain, supportArtists, director, producer, musicDirector, cinematographer, showTimings } = req.body;
+    const {
+      title,
+      hero,
+      heroine,
+      villain,
+      supportArtists,
+      director,
+      producer,
+      musicDirector,
+      cinematographer,
+      showTimings,
+    } = req.body;
 
-    // Multer will give files in req.files
-    const posters = req.files?.map(file => file.filename) || [];
+    const posters = req.files?.map((file) => file.filename) || [];
 
     // Parse showTimings JSON from frontend
     const shows = showTimings ? JSON.parse(showTimings) : [];

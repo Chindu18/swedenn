@@ -149,7 +149,7 @@ const Movies = () => {
       // Add poster files
       formData.posters.forEach((file) => data.append("photos", file));
 
-      const res = await axios.post(`${backend_url}api/addDetails`, data, {
+      const res = await axios.post(`${backend_url}/api/addDetails`, data, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
