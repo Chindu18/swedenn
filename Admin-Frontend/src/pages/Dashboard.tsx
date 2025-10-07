@@ -15,7 +15,7 @@ const Dashboard = () => {
 useEffect(() => {
   const fetchMovie = async () => {
     try {
-      const response = await axios.get(`{backend_url}/movie/getmovie`);
+      const response = await axios.get(`${backend_url}/movie/getmovie`);
       const data = response.data.data;
       if (data && data.length > 0) {
         const lastMovie = data[data.length - 1];
