@@ -64,15 +64,20 @@ export const getBookedSeats = async (req, res) => {
 
 
 // ---------------------- Multer Storage ----------------------
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, "uploads/movies"),
-  filename: (req, file, cb) => cb(null, Date.now() + "-" + file.originalname.replace(/\s+/g, "_")),
-});
 
-export const upload = multer({ storage });
+
+export const upload = multer({ storage: multer.memoryStorage() });
+
+
+
 
 // ---------------------- Add Movie Controller ----------------------
 
+
+// POST /api/addDetails
+
+import cloudinary from "../config/cloudinary.js";
+import streamifier from "streamifier";
 
 // POST /api/addDetails
 export const addMovie = async (req, res) => {
@@ -90,9 +95,25 @@ export const addMovie = async (req, res) => {
       showTimings,
     } = req.body;
 
-    const posters = req.files?.map((file) => file.filename) || [];
+    const files = req.files || [];
+    const posterUrls = [];
 
-    // Parse showTimings JSON from frontend
+    // Upload files to Cloudinary
+    for (const file of files) {
+      const uploadResult = await new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          { folder: "movies" },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+          }
+        );
+        streamifier.createReadStream(file.buffer).pipe(stream);
+      });
+
+      posterUrls.push(uploadResult.secure_url);
+    }
+
     const shows = showTimings ? JSON.parse(showTimings) : [];
 
     const movie = new Movie({
@@ -109,7 +130,7 @@ export const addMovie = async (req, res) => {
         musicDirector,
         cinematographer,
       },
-      posters,
+      posters: posterUrls, // store Cloudinary URLs
       shows,
     });
 
@@ -128,4 +149,5 @@ export const addMovie = async (req, res) => {
     });
   }
 };
+
 
