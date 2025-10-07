@@ -8,12 +8,14 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import axios from "axios";
 
 const Dashboard = () => {
+  const backend_url='https://swedenn-backend.onrender.com'
+
   const [movie, setmovie] = useState({});
 
 useEffect(() => {
   const fetchMovie = async () => {
     try {
-      const response = await axios.get("http://localhost:8004/movie/getmovie");
+      const response = await axios.get(`{backend_url}/movie/getmovie`);
       const data = response.data.data;
       if (data && data.length > 0) {
         const lastMovie = data[data.length - 1];
@@ -51,13 +53,13 @@ useEffect(() => {
   const fetchData = async () => {
     try {
       // Total seats for this movie
-      const seatsResp = await axios.get("http://localhost:8004/dashboard/seats", {
+      const seatsResp = await axios.get(`${backend_url}/dashboard/seats`, {
         params: { movieName: movie.title },
       });
       setTotalSeats(seatsResp.data.totalSeats);
 
       //totalShow
-      const totalShow=await axios.get('http://localhost:8004/dashboard/totalshow',{
+      const totalShow=await axios.get(`${backend_url}/dashboard/totalshow`,{
         params:{movieName:movie.title}
 
       })
@@ -65,12 +67,12 @@ useEffect(() => {
       console.log(totalShow.data.totalShows)
 
       // Pending bookings
-      const pendingResp = await axios.get("http://localhost:8004/dashboard/pending", {
+      const pendingResp = await axios.get(`${backend_url}/dashboard/pending`, {
         params: { movieName: movie.title, paymentStatus: "pending" },
       });
 
       // Paid bookings
-      const paidResp = await axios.get("http://localhost:8004/dashboard/pending", {
+      const paidResp = await axios.get(`${backend_url}/dashboard/pending`, {
         params: { movieName: movie.title, paymentStatus: "paid" },
       });
 
@@ -119,7 +121,7 @@ useEffect(() => {
 
       try {
         // Call backend API to update payment status
-        await axios.put(`http://localhost:8004/dashboard/booking/${booking.bookingId}/status`, {
+        await axios.put(`${backend_url}/dashboard/booking/${booking.bookingId}/status`, {
           paymentStatus: "paid",
         });
 
