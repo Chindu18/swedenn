@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X } from "lucide-react";
+import { Film, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const Navbar = () => {
@@ -21,9 +21,12 @@ const Navbar = () => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2">
-            <span className="text-xl font-bold text-primary-foreground">
-              Sweden Tamil Film
+          <Link to="/dashboard" className="flex items-center gap-2 group">
+            <div className="p-2  group-hover:scale-105 transition-transform">
+              <Film className="h-6 w-6 text-white" />
+            </div>
+            <span className="text-xl font-bold text-white ">
+              Tamil Film Sweden
             </span>
           </Link>
 

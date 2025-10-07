@@ -13,7 +13,8 @@ const BookingSchema = new mongoose.Schema({
   ticketType: { type: String, required: true },
   totalAmount: { type: Number, required: true },
   totalSeatsSelected: { type: Number, required: true },
-  paymentStatus: { type: String, enum: ['pending', 'paid', 'failed'], default: 'pending' } 
+  paymentStatus: { type: String, enum: ['pending', 'paid', 'failed'], default: 'pending' } ,
+  movieName:{type:String,required:true}
 }, { timestamps: true });
 
 export default mongoose.model("Booking", BookingSchema);

@@ -208,54 +208,7 @@ const castMembers = [
             <div className="w-32 h-1 bg-accent mx-auto rounded-full"></div>
           </div>
 
-          {/* <div className="grid md:grid-cols-2 gap-8 mb-12"> */}
-            {/* Show Timings */}
-            {/* <Card className="bg-white/5 backdrop-blur-md border-white/10 hover-lift">
-              <CardContent className="p-8">
-                <div className="flex items-center gap-3 mb-6">
-                  <Clock className="w-8 h-8 text-accent" />
-                  <h3 className="text-3xl font-bold">Show Timings</h3>
-                </div>
-                <div className="space-y-3">
-                  {["10:00 AM", "2:00 PM", "6:00 PM", "9:30 PM"].map((time, index) => (
-                    <div 
-                      key={time}
-                      className="flex items-center justify-between p-4 bg-white/5 rounded-lg hover:bg-accent/20 transition-colors animate-fade-in"
-                      style={{ animationDelay: `${index * 0.1}s` }}
-                    >
-                      <span className="text-lg font-semibold">{time}</span>
-                      <Calendar className="w-5 h-5 text-accent" />
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card> */}
-
-            {/* Ticket Prices */}
-            {/* <Card className="bg-white/5 backdrop-blur-md border-white/10 hover-lift">
-              <CardContent className="p-8">
-                <div className="flex items-center gap-3 mb-6">
-                  <Ticket className="w-8 h-8 text-accent" />
-                  <h3 className="text-3xl font-bold">Ticket Prices</h3>
-                </div>
-                <div className="space-y-3">
-                  {prices.map((price, index) => (
-                    <div 
-                      key={index}
-                      className="flex justify-between items-center p-4 bg-white/5 rounded-lg hover:bg-accent/20 transition-colors animate-fade-in"
-                      style={{ animationDelay: `${index * 0.1}s` }}
-                    >
-                      <div className="flex items-center gap-3">
-                        <span className="text-2xl">{price.icon}</span>
-                        <span className="font-medium">{price.type}</span>
-                      </div>
-                      <span className="text-accent font-bold text-xl">{price.price}</span>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card> */}
-          {/* </div> */}
+         
 
           
 
@@ -275,11 +228,11 @@ const castMembers = [
             <div className="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
             <CardContent className="p-8 relative z-10">
               <div className="flex items-center justify-center gap-4 flex-wrap">
-                <Sparkles className="w-8 h-8 animate-pulse" />
-                <h3 className="text-3xl md:text-4xl font-bold text-center">
+                <Sparkles className="w-8 h-8 animate-pulse text-yellow-600" />
+                <h3 className="text-3xl md:text-4xl font-bold text-center text-white">
                   ₹20 Discount at Video Speed & Pay at Sodertalije!
                 </h3>
-                <Sparkles className="w-8 h-8 animate-pulse" />
+                <Sparkles className="w-8 h-8 animate-pulse text-yellow-600" />
               </div>
             </CardContent>
           </Card>
@@ -289,9 +242,9 @@ const castMembers = [
               <CardContent className="p-8">
                 <div className="flex items-center gap-3 mb-4">
                   <MapPin className="w-8 h-8 text-accent" />
-                  <h3 className="text-3xl font-bold">Location</h3>
+                  <h3 className="text-3xl font-bold text-white">Location</h3>
                 </div>
-                <p className="text-lg mb-4">Nanganallur, Chennai</p>
+                <p className="text-lg mb-4 text-white">Nanganallur, Chennai</p>
                 <a
                   href="https://www.google.com/maps"
                   target="_blank"
@@ -307,9 +260,9 @@ const castMembers = [
               <CardContent className="p-8">
                 <div className="flex items-center gap-3 mb-4">
                   <Phone className="w-8 h-8 text-accent" />
-                  <h3 className="text-3xl font-bold">Contact</h3>
+                  <h3 className="text-3xl font-bold text-white">Contact</h3>
                 </div>
-                <div className="space-y-2 text-lg">
+                <div className="space-y-2 text-lg text-white">
                   <p>+91 98765 43210</p>
                   <p>+91 98765 43211</p>
                 </div>

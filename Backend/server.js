@@ -6,7 +6,7 @@ import movieRouter from './Routes/movie.js';
 
 
 const app = express();
-const port = 8004;
+const port = process.env.PORT || 8004;
 
 app.use(cors());
 app.use(express.json());

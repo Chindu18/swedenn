@@ -172,6 +172,7 @@ const BookTicket = () => {
         date: selectedShow.date,
         timing: selectedShow.time,
         ...booking,
+        movieName:movie.title
       });
 
       setBookedSeats([...bookedSeats, ...selectedSeats]);
