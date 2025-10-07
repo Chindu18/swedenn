@@ -1,8 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { IndianRupee, X } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import axios from "axios";
-
 
 interface Cast {
   actor: string;
@@ -34,21 +33,21 @@ interface Show {
 }
 
 interface Movie {
-  id: number;
+  _id: string;
   title: string;
   cast: Cast;
   crew: Crew;
-  posters: File[] | string[]; // can be File objects or URLs
+  posters: string[];
   shows: Show[];
 }
 
 const Movies = () => {
-  const backend_url='https://swedenn-backend.onrender.com'
+  const backend_url = 'https://swedenn-backend.onrender.com';
   const [movies, setMovies] = useState<Movie[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [modalMovie, setModalMovie] = useState<Movie | null>(null);
 
-  const initialFormData: Omit<Movie, "id"> = {
+  const initialFormData: Omit<Movie, "_id"> & { posters: File[] } = {
     title: "",
     cast: { actor: "", actress: "", villan: "", supporting: "" },
     crew: { director: "", producer: "", musicDirector: "", cinematographer: "" },
@@ -59,47 +58,47 @@ const Movies = () => {
   const [formData, setFormData] = useState(initialFormData);
   const [posterPreviews, setPosterPreviews] = useState<string[]>([]);
 
+  // ---------------------- Fetch existing movies ----------------------
+  const fetchMovies = async () => {
+    try {
+      const res = await axios.get(`${backend_url}/api/movie/getAll`);
+      setMovies(res.data.data || []);
+    } catch (err) {
+      console.error("Error fetching movies:", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchMovies();
+  }, []);
+
   // ---------------------- Input Handlers ----------------------
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement>,
-    section?: keyof Omit<Movie, "id" | "title" | "posters" | "shows">,
+    section?: keyof Omit<Movie, "_id" | "title" | "posters" | "shows">,
     key?: string
   ) => {
     const { value, name } = e.target;
     if (section && key) {
-      setFormData({
-        ...formData,
-        [section]: { ...formData[section], [key]: value },
-      });
+      setFormData({ ...formData, [section]: { ...formData[section], [key]: value } });
     } else {
       setFormData({ ...formData, [name]: value });
     }
   };
 
-  // ---------------------- Poster Upload ----------------------
   const handlePosterUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []).slice(0, 3);
     setFormData({ ...formData, posters: files });
-
-    const previews = files.map((file) => URL.createObjectURL(file));
-    setPosterPreviews(previews);
+    setPosterPreviews(files.map((f) => URL.createObjectURL(f)));
   };
 
-  // ---------------------- Add Show ----------------------
+  // ---------------------- Shows ----------------------
   const addShow = () => {
     setFormData({
       ...formData,
       shows: [
         ...formData.shows,
-        {
-          date: "",
-          time: "",
-          prices: {
-            online: { adult: "", kids: "" },
-            videoSpeed: { adult: "", kids: "" },
-            soder: { adult: "", kids: "" },
-          },
-        },
+        { date: "", time: "", prices: { online: { adult: "", kids: "" }, videoSpeed: { adult: "", kids: "" }, soder: { adult: "", kids: "" } } },
       ],
     });
   };
@@ -112,12 +111,10 @@ const Movies = () => {
     value: string
   ) => {
     const shows = [...formData.shows];
-    if (field === "time") {
-      shows[index].time = value;
-    } else if (field === "date") {
-      shows[index].date = value;
-    } else if (field === "prices" && method && type) {
-      if (/\D/.test(value)) return; // numeric only
+    if (field === "time") shows[index].time = value;
+    else if (field === "date") shows[index].date = value;
+    else if (field === "prices" && method && type) {
+      if (/\D/.test(value)) return;
       shows[index].prices[method][type] = value;
     }
     setFormData({ ...formData, shows });
@@ -126,78 +123,49 @@ const Movies = () => {
   // ---------------------- Submit Form ----------------------
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
     try {
       const data = new FormData();
-
-      // Add individual fields for backend
       data.append("title", formData.title);
-
       data.append("hero", formData.cast.actor);
       data.append("heroine", formData.cast.actress);
       data.append("villain", formData.cast.villan);
       data.append("supportArtists", formData.cast.supporting);
-
       data.append("director", formData.crew.director);
       data.append("producer", formData.crew.producer);
       data.append("musicDirector", formData.crew.musicDirector);
       data.append("cinematographer", formData.crew.cinematographer);
-
-      // Add show timings as JSON
       data.append("showTimings", JSON.stringify(formData.shows));
-
-      // Add poster files
       formData.posters.forEach((file) => data.append("photos", file));
 
-      const res = await axios.post(`${backend_url}/api/addDetails`, data, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      const res = await axios.post(`${backend_url}/api/addDetails`, data, { headers: { "Content-Type": "multipart/form-data" } });
 
-      console.log("Saved movie:", res.data);
-
-      const newMovie = { id: Date.now(), ...formData };
-      setMovies((prev) => {
-        const updated = [...prev, newMovie];
-        if (updated.length > 5) updated.shift();
-        return updated;
-      });
-
+      setMovies((prev) => [res.data.data, ...prev]);
       setFormData(initialFormData);
       setPosterPreviews([]);
       setShowForm(false);
-    } catch (err) {
-      console.error("Error saving movie:", err);
-      alert("Something went wrong saving movie");
+      alert("Movie saved successfully!");
+    } catch (err: any) {
+      console.error("Error saving movie:", err.response?.data || err.message);
+      alert("Failed to save movie. Check console for details.");
     }
   };
- 
 
-
+  const getPosterSrc = (poster: File | string) =>
+    poster instanceof File ? URL.createObjectURL(poster) : `${backend_url}/${poster.replace(/^\/+/, "")}`;
 
   // ---------------------- JSX ----------------------
   return (
     <div className="min-h-screen bg-background p-8">
       <h1 className="text-4xl font-bold mb-4">Movies Collection</h1>
 
-      <button
-        className="bg-blue-600 text-white px-4 py-2 rounded mb-6"
-        onClick={() => setShowForm(!showForm)}
-      >
+      <button className="bg-blue-600 text-white px-4 py-2 rounded mb-6" onClick={() => setShowForm(!showForm)}>
         {showForm ? "Close Form" : "Add Movie"}
       </button>
 
       {showForm && (
         <form className="mb-6 max-w-3xl p-6 border rounded shadow space-y-4" onSubmit={handleSubmit}>
           {/* Title */}
-          <input
-            type="text"
-            name="title"
-            placeholder="Movie Title"
-            value={formData.title}
-            onChange={handleChange}
-            required
-            className="border p-2 w-full rounded"
-          />
+          <input type="text" name="title" placeholder="Movie Title" value={formData.title} onChange={handleChange} required className="border p-2 w-full rounded" />
 
           {/* Cast */}
           <div>
@@ -234,7 +202,7 @@ const Movies = () => {
           {/* Posters */}
           <div>
             <label className="font-semibold">Posters (3 max):</label>
-            <input type="file" multiple accept="image/*" onChange={handlePosterUpload} required/>
+            <input type="file" multiple accept="image/*" onChange={handlePosterUpload} required />
             <div className="flex gap-2 mt-2">
               {posterPreviews.map((src, idx) => (
                 <img key={idx} src={src} alt={`Poster ${idx + 1}`} className="w-24 h-24 object-cover border rounded" />
@@ -247,46 +215,15 @@ const Movies = () => {
             <label className="font-semibold">Shows:</label>
             {formData.shows.map((show, idx) => (
               <div key={idx} className="border p-3 rounded mb-3 space-y-2">
-                {/* Date Input */}
-                <input
-                  type="date"
-                  value={show.date}
-                  onChange={(e) => handleShowChange(idx, "date", null, null, e.target.value)}
-                  className="border p-2 w-full rounded"
-                  required
-                />
+                <input type="date" value={show.date} onChange={(e) => handleShowChange(idx, "date", null, null, e.target.value)} className="border p-2 w-full rounded" required />
+                <input type="text" placeholder="Show Time" value={show.time} onChange={(e) => handleShowChange(idx, "time", null, null, e.target.value)} className="border p-2 w-full rounded" required />
 
-                {/* Time Input */}
-                <input
-                  type="text"
-                  placeholder="Show Time (e.g., 2:00 PM)"
-                  value={show.time}
-                  onChange={(e) => handleShowChange(idx, "time", null, null, e.target.value)}
-                  className="border p-2 w-full rounded"
-                  required
-                />
-
-                {/* Prices */}
                 <div className="grid grid-cols-3 gap-2">
                   {(["online", "videoSpeed", "soder"] as const).map((method) => (
                     <div key={method} className="border p-2 rounded space-y-1">
                       <p className="font-medium">{method}</p>
-                      <input
-                        type="text"
-                        placeholder="Adult Price"
-                        value={show.prices[method].adult}
-                        onChange={(e) => handleShowChange(idx, "prices", method, "adult", e.target.value)}
-                        className="border p-1 w-full rounded"
-                        required
-                      />
-                      <input
-                        type="text"
-                        placeholder="Kids Price"
-                        value={show.prices[method].kids}
-                        onChange={(e) => handleShowChange(idx, "prices", method, "kids", e.target.value)}
-                        className="border p-1 w-full rounded"
-                        required
-                      />
+                      <input type="text" placeholder="Adult Price" value={show.prices[method].adult} onChange={(e) => handleShowChange(idx, "prices", method, "adult", e.target.value)} className="border p-1 w-full rounded" required />
+                      <input type="text" placeholder="Kids Price" value={show.prices[method].kids} onChange={(e) => handleShowChange(idx, "prices", method, "kids", e.target.value)} className="border p-1 w-full rounded" required />
                     </div>
                   ))}
                 </div>
@@ -306,16 +243,8 @@ const Movies = () => {
       {/* Movie Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {movies.map((movie) => (
-          <Card key={movie.id} className="cursor-pointer hover:shadow-lg" onClick={() => setModalMovie(movie)}>
-            <img
-              src={
-                movie.posters[0] instanceof File
-                  ? URL.createObjectURL(movie.posters[0])
-                  : `http://localhost:8004/${movie.posters[0]}`
-              }
-              alt={movie.title}
-              className="w-full h-64 object-cover"
-            />
+          <Card key={movie._id} className="cursor-pointer hover:shadow-lg" onClick={() => setModalMovie(movie)}>
+            <img src={getPosterSrc(movie.posters[0])} alt={movie.title} className="w-full h-64 object-cover" />
             <CardContent className="flex justify-between p-3">
               <span>
                 Paid: <IndianRupee className="h-4 w-4 inline" /> 0
@@ -348,9 +277,7 @@ const Movies = () => {
             <ul className="list-disc pl-5">
               {modalMovie.shows.map((show, idx) => (
                 <li key={idx}>
-                  {show.date} - {show.time} - Online: {show.prices.online.adult}/{show.prices.online.kids}, Video:{" "}
-                  {show.prices.videoSpeed.adult}/{show.prices.videoSpeed.kids}, Soder:{" "}
-                  {show.prices.soder.adult}/{show.prices.soder.kids}
+                  {show.date} - {show.time} - Online: {show.prices.online.adult}/{show.prices.online.kids}, Video: {show.prices.videoSpeed.adult}/{show.prices.videoSpeed.kids}, Soder: {show.prices.soder.adult}/{show.prices.soder.kids}
                 </li>
               ))}
             </ul>
