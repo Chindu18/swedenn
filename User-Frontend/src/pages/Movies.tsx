@@ -18,6 +18,7 @@ import { useEffect, useState } from "react";
 
 
 const Movies = () => {
+  const backend_url='https://swedenn-backend.onrender.com'
   const url='http://localhost:8004/movie/getmovie'
   const navigate = useNavigate();
  const [Movielist, setMovielist] = useState({
@@ -35,7 +36,7 @@ const Movies = () => {
   const fetchdata=async()=>{
       try {
         console.log('working')
-        const response = await axios.get('http://localhost:8004/movie/getmovie');
+        const response = await axios.get(`${backend_url}/movie/getmovie`);
       let data = response.data.data; // Use 'let' if you want to reassign
           if (data !== undefined && data.length > 0) {
         const lastMovie = data[data.length - 1];
