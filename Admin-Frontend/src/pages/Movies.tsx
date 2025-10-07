@@ -61,8 +61,8 @@ const Movies = () => {
   // ---------------------- Fetch existing movies ----------------------
   const fetchMovies = async () => {
     try {
-      const res = await axios.get(`${backend_url}/api/movie/getAll`);
-      setMovies(res.data.data || []);
+      const res = await axios.get(`${backend_url}/movie/getmovie`);
+      setMovies(res.data.data);
     } catch (err) {
       console.error("Error fetching movies:", err);
     }

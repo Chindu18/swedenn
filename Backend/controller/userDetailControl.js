@@ -117,7 +117,7 @@ export const addMovie = async (req, res) => {
 
     // Handle local files
     const files = req.files || [];
-    const posterUrls = files.map((file) => `/uploads/movies/${file.filename}`);
+    const posterUrls = files.map((file) => `${file.filename}`);
 
     // Parse show timings safely
     let shows = [];
