@@ -149,9 +149,10 @@ const Movies = () => {
       alert("Failed to save movie. Check console for details.");
     }
   };
-
-  const getPosterSrc = (poster: File | string) =>
-    poster instanceof File ? URL.createObjectURL(poster) : `${backend_url}/${poster.replace(/^\/+/, "")}`;
+const getPosterSrc = (poster: File | string) =>
+  poster instanceof File
+    ? URL.createObjectURL(poster)
+    : `${backend_url}/uploads/${poster}`;
 
   // ---------------------- JSX ----------------------
   return (
