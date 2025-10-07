@@ -403,6 +403,7 @@ const BookTicket = () => {
                   <QRCodeSVG value={JSON.stringify(bookingData)} size={220} level="H" includeMargin={true} />
                 </div>
                 <div className="text-center space-y-3 w-full bg-muted/30 p-6 rounded-xl">
+                   <p className="text-3xl font-bold text-green-500">MOVIE:{movie.title}</p> 
                   <p className="text-sm text-muted-foreground"><span className="font-semibold text-foreground text-lg">Seats:</span> {bookingData.seatNumbers.join(", ")}</p>
                   <p className="text-2xl font-bold text-accent">₹{bookingData.totalAmount}</p>
                   <p className="text-sm text-muted-foreground">Show: {selectedShow?.date} {selectedShow?.time}</p>

@@ -43,6 +43,7 @@ interface Movie {
 }
 
 const Movies = () => {
+  const backend_url='https://swedenn-backend.onrender.com'
   const [movies, setMovies] = useState<Movie[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [modalMovie, setModalMovie] = useState<Movie | null>(null);
@@ -148,7 +149,7 @@ const Movies = () => {
       // Add poster files
       formData.posters.forEach((file) => data.append("photos", file));
 
-      const res = await axios.post("http://localhost:8004/api/addDetails", data, {
+      const res = await axios.post(`${backend_url}api/addDetails`, data, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
