@@ -147,7 +147,7 @@ const castMembers = [
             <p className="text-muted-foreground text-lg">Meet the talented artists</p>
           </div>
           
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-5xl mx-auto">
+          {/* <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-5xl mx-auto">
             {castMembers.map((cast, index) => (
               <Card 
                 key={cast.id} 
@@ -163,7 +163,26 @@ const castMembers = [
                 </CardContent>
               </Card>
             ))}
-          </div>
+          </div> */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 max-w-5xl mx-auto">
+          {castMembers.map((cast, index) => (
+            <Card 
+              key={cast.id} 
+              className="border-2 border-border hover:border-accent transition-all duration-300 hover-lift animate-scale-in overflow-hidden group"
+              style={{ animationDelay: `${index * 0.1}s` }}
+            >
+              <CardContent className="p-6 text-center">
+                <div className="w-24 h-24 mx-auto mb-4 bg-gradient-to-br from-accent/20 to-accent/5 rounded-full flex items-center justify-center border-4 border-accent/20 group-hover:border-accent transition-colors">
+                  <span className="text-5xl group-hover:scale-110 transition-transform">👤</span>
+                </div>
+                <h3 className="font-bold text-lg text-foreground mb-1">{cast.name}</h3>
+                <p className="text-accent text-sm font-semibold">{cast.role}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+          
         </div>
       </section>
 
@@ -177,7 +196,7 @@ const castMembers = [
             <p className="text-muted-foreground text-lg">The masterminds behind the magic</p>
           </div>
           
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-5xl mx-auto">
+          {/* <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-5xl mx-auto">
             {crewMembers.map((crew, index) => (
               <Card 
                 key={crew.id} 
@@ -193,7 +212,25 @@ const castMembers = [
                 </CardContent>
               </Card>
             ))}
-          </div>
+          </div> */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 max-w-5xl mx-auto">
+  {crewMembers.map((crew, index) => (
+    <Card 
+      key={crew.id} 
+      className="border-2 border-border hover:border-accent transition-all duration-300 hover-lift animate-scale-in overflow-hidden group"
+      style={{ animationDelay: `${index * 0.1}s` }}
+    >
+      <CardContent className="p-6 text-center">
+        <div className="w-24 h-24 mx-auto mb-4 bg-gradient-to-br from-accent/20 to-accent/5 rounded-full flex items-center justify-center border-4 border-accent/20 group-hover:border-accent transition-colors">
+          <span className="text-5xl group-hover:scale-110 transition-transform">🎬</span>
+        </div>
+        <h3 className="font-bold text-lg text-foreground mb-1">{crew.name}</h3>
+        <p className="text-accent text-sm font-semibold">{crew.role}</p>
+      </CardContent>
+    </Card>
+  ))}
+</div>
+
         </div>
       </section>
 
@@ -215,7 +252,7 @@ const castMembers = [
 
           
           {/* Book Button */}
-          <div className="text-center mb-12">
+          {/* <div className="text-center mb-12">
             <Button
               onClick={() => navigate("/book-ticket")}
               className="bg-accent hover:bg-accent/90 text-white font-bold text-2xl py-8 px-16 rounded-full cinema-glow hover:scale-105 transition-all duration-300 shadow-2xl"
@@ -223,7 +260,23 @@ const castMembers = [
             >
               Book Ticket Now
             </Button>
-          </div>
+          </div> */}
+                <div className="text-center mb-12 px-4 sm:px-0">
+                  <Button
+                    onClick={() => navigate("/book-ticket")}
+                    className="bg-accent hover:bg-accent/90 text-white font-bold 
+                              text-sm sm:text-lg md:text-2xl py-3 sm:py-4 md:py-8 
+                              px-4 sm:px-8 md:px-16 rounded-full cinema-glow 
+                              hover:scale-105 transition-all duration-300 shadow-2xl
+                              w-full sm:w-auto"
+                    size="lg"
+                  >
+                    Book Ticket Now
+                  </Button>
+                </div>
+
+
+
           {/* Discount Banner */}
           <Card className="bg-gradient-to-r from-accent to-accent/80 border-accent cinema-glow mb-12 overflow-hidden relative">
             <div className="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
@@ -238,7 +291,7 @@ const castMembers = [
             </CardContent>
           </Card>
           {/* Location & Contact */}
-          <div className="grid md:grid-cols-2 gap-8 ">
+          {/* <div className="grid md:grid-cols-2 gap-8 ">
             <Card className="bg-white/5 backdrop-blur-md border-white/10 hover-lift">
               <CardContent className="p-8">
                 <div className="flex items-center gap-3 mb-4">
@@ -269,7 +322,43 @@ const castMembers = [
                 </div>
               </CardContent>
             </Card>
-          </div>
+          </div> */}
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
+  {/* Location Card */}
+  <Card className="bg-white/5 backdrop-blur-md border-white/10 hover-lift w-full">
+    <CardContent className="p-6 sm:p-8">
+      <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-4">
+        <MapPin className="w-6 h-6 sm:w-8 sm:h-8 text-accent" />
+        <h3 className="text-2xl sm:text-3xl font-bold text-white">Location</h3>
+      </div>
+      <p className="text-base sm:text-lg mb-2 sm:mb-4 text-white">Nanganallur, Chennai</p>
+      <a
+        href="https://www.google.com/maps"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex items-center gap-1 sm:gap-2 text-accent hover:text-accent/80 font-semibold text-base sm:text-lg transition-colors"
+      >
+        View in Google Maps →
+      </a>
+    </CardContent>
+  </Card>
+
+  {/* Contact Card */}
+  <Card className="bg-white/5 backdrop-blur-md border-white/10 hover-lift w-full">
+    <CardContent className="p-6 sm:p-8">
+      <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-4">
+        <Phone className="w-6 h-6 sm:w-8 sm:h-8 text-accent" />
+        <h3 className="text-2xl sm:text-3xl font-bold text-white">Contact</h3>
+      </div>
+      <div className="space-y-1 sm:space-y-2 text-base sm:text-lg text-white">
+        <p>+91 98765 43210</p>
+        <p>+91 98765 43211</p>
+      </div>
+    </CardContent>
+  </Card>
+</div>
+
 
         </div>
       </section>

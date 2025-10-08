@@ -295,31 +295,90 @@ const [qrdata,setqrdata]=useState({});
 
 
                 {ticketType && (
-                  <div className="space-y-4 border-2 border-border rounded-lg p-6">
-                    <div className="flex justify-between items-center">
-                      <Label className="text-lg font-semibold">Adult (₹{ticketPrice.adult})</Label>
-                      <div className="flex items-center gap-2">
-                        <button onClick={() => setAdult(Math.max(adult - 1, 0))} className="px-3 py-1 bg-gray-200 rounded">-</button>
-                        <span className="w-8 text-center">{adult}</span>
-                        <button onClick={() => setAdult(adult + 1)} className="px-3 py-1 bg-gray-200 rounded">+</button>
-                      </div>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <Label className="text-lg font-semibold">Kids (₹{ticketPrice.kids})</Label>
-                      <div className="flex items-center gap-2">
-                        <button onClick={() => setKids(Math.max(kids - 1, 0))} className="px-3 py-1 bg-gray-200 rounded">-</button>
-                        <span className="w-8 text-center">{kids}</span>
-                        <button onClick={() => setKids(kids + 1)} className="px-3 py-1 bg-gray-200 rounded">+</button>
-                      </div>
-                    </div>
-                    <p className="text-lg font-semibold mt-2">Total Seats: {totalSeatsSelected}</p>
-                    <div className="pt-4 border-t-2 border-border mt-4">
-                      <div className="flex justify-between items-center p-4 bg-accent/10 rounded-lg">
-                        <span className="text-xl font-bold">Total Amount:</span>
-                        <span className="text-2xl font-bold text-accent">₹{calculateTotal()}</span>
-                      </div>
-                    </div>
-                  </div>
+                  // <div className="space-y-4 border-2 border-border rounded-lg p-6">
+                  //   <div className="flex justify-between items-center">
+                  //     <Label className="text-lg font-semibold">Adult (₹{ticketPrice.adult})</Label>
+                  //     <div className="flex items-center gap-2">
+                  //       <button onClick={() => setAdult(Math.max(adult - 1, 0))} className="px-3 py-1 bg-gray-200 rounded">-</button>
+                  //       <span className="w-8 text-center">{adult}</span>
+                  //       <button onClick={() => setAdult(adult + 1)} className="px-3 py-1 bg-gray-200 rounded">+</button>
+                  //     </div>
+                  //   </div>
+                  //   <div className="flex justify-between items-center">
+                  //     <Label className="text-lg font-semibold">Kids (₹{ticketPrice.kids})</Label>
+                  //     <div className="flex items-center gap-2">
+                  //       <button onClick={() => setKids(Math.max(kids - 1, 0))} className="px-3 py-1 bg-gray-200 rounded">-</button>
+                  //       <span className="w-8 text-center">{kids}</span>
+                  //       <button onClick={() => setKids(kids + 1)} className="px-3 py-1 bg-gray-200 rounded">+</button>
+                  //     </div>
+                  //   </div>
+                  //   <p className="text-lg font-semibold mt-2">Total Seats: {totalSeatsSelected}</p>
+                  //   <div className="pt-4 border-t-2 border-border mt-4">
+                  //     <div className="flex justify-between items-center p-4 bg-accent/10 rounded-lg">
+                  //       <span className="text-xl font-bold">Total Amount:</span>
+                  //       <span className="text-2xl font-bold text-accent">₹{calculateTotal()}</span>
+                  //     </div>
+                  //   </div>
+                  // </div>
+                  <div className="space-y-6 border-2 border-border rounded-lg p-4 sm:p-6">
+  {/* Adult Ticket */}
+  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+    <Label className="text-lg font-semibold mb-2 sm:mb-0">
+      Adult (₹{ticketPrice.adult})
+    </Label>
+    <div className="flex justify-center sm:justify-start items-center gap-2">
+      <button
+        onClick={() => setAdult(Math.max(adult - 1, 0))}
+        className="px-4 py-2 bg-gray-200 rounded text-lg sm:text-base"
+      >
+        -
+      </button>
+      <span className="w-10 text-center text-lg">{adult}</span>
+      <button
+        onClick={() => setAdult(adult + 1)}
+        className="px-4 py-2 bg-gray-200 rounded text-lg sm:text-base"
+      >
+        +
+      </button>
+    </div>
+  </div>
+
+  {/* Kids Ticket */}
+  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+    <Label className="text-lg font-semibold mb-2 sm:mb-0">
+      Kids (₹{ticketPrice.kids})
+    </Label>
+    <div className="flex justify-center sm:justify-start items-center gap-2">
+      <button
+        onClick={() => setKids(Math.max(kids - 1, 0))}
+        className="px-4 py-2 bg-gray-200 rounded text-lg sm:text-base"
+      >
+        -
+      </button>
+      <span className="w-10 text-center text-lg">{kids}</span>
+      <button
+        onClick={() => setKids(kids + 1)}
+        className="px-4 py-2 bg-gray-200 rounded text-lg sm:text-base"
+      >
+        +
+      </button>
+    </div>
+  </div>
+
+  {/* Total Seats */}
+  <p className="text-lg font-semibold text-center sm:text-left">
+    Total Seats: {totalSeatsSelected}
+  </p>
+
+  {/* Total Amount */}
+  <div className="pt-4 border-t-2 border-border mt-4">
+    <div className="flex flex-col sm:flex-row justify-between items-center p-4 bg-accent/10 rounded-lg gap-2 sm:gap-0">
+      <span className="text-xl font-bold">Total Amount:</span>
+      <span className="text-2xl font-bold text-accent">₹{calculateTotal()}</span>
+    </div>
+  </div>
+</div>
+
                 )}
               </CardContent>
             </Card>
