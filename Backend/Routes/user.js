@@ -8,4 +8,5 @@ userRouter.post("/addBooking", addBooking);
 userRouter.get("/bookedSeats", getBookedSeats);
 userRouter.post("/addDetails", upload.array("photos", 3), addMovie);
 
+
 export default userRouter;

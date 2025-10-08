@@ -19,16 +19,16 @@ const movieSchema = new mongoose.Schema(
   {
     title: { type: String, required: true },
     cast: {
-      actor: { type: String, default: "" },
-      actress: { type: String, default: "" },
-      villan: { type: String, default: "" },
-      supporting: { type: String, default: "" },
+      actor: { type: String, default: "", required: true },
+      actress: { type: String, default: "", required: true },
+      villan: { type: String, default: "" , required: true},
+      supporting: { type: String, default: "" , required: true},
     },
     crew: {
-      director: { type: String, default: "" },
-      producer: { type: String, default: "" },
-      musicDirector: { type: String, default: "" },
-      cinematographer: { type: String, default: "" },
+      director: { type: String, default: "", required: true },
+      producer: { type: String, default: "", required: true },
+      musicDirector: { type: String, default: "" , required: true},
+      cinematographer: { type: String, default: "", required: true },
     },
     posters: { type: [String],required: true }, // uploaded images URLs
     shows: { type: [showSchema],required: true}, // store array of shows

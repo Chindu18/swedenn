@@ -3,6 +3,16 @@ import multer from "multer";
 import Movie from "../Models/Movies.js";
 
 
+import { v2 as cloudinary } from "cloudinary";
+import { CloudinaryStorage } from "multer-storage-cloudinary";
+
+cloudinary.config({
+    cloud_name:'dfom7glyl',
+    api_key:process.env.api_key,
+    api_secret:process.env.api_pass,
+});
+
+
 // Add a booking
 // Controllers/yourController.js
 
@@ -34,7 +44,7 @@ export const addBooking = async (req, res) => {
     res.status(201).json({ 
       message: "Booking saved successfully",
       success: true,
-      data:booking
+      data:booking,
       bookingId 
     });
   } catch (error) {
@@ -76,27 +86,24 @@ export const getBookedSeats = async (req, res) => {
 
 // Controllers/userDetailControl.js
 
-import path from "path";
-import fs from "fs";
-
 
 // ---------------------- Multer Local Storage ----------------------
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const uploadPath = path.join(process.cwd(), "uploads/movies");
-    // Ensure folder exists
-    fs.mkdirSync(uploadPath, { recursive: true });
-    cb(null, uploadPath);
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, uniqueSuffix + path.extname(file.originalname));
+
+
+const storage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder: "movies/posters",
+    allowed_formats: ["jpg", "png", "jpeg", "webp"],
   },
 });
-
 export const upload = multer({ storage });
 
+
 // ---------------------- Add Movie Controller ----------------------
+
+
+
 export const addMovie = async (req, res) => {
   try {
     const {
@@ -112,52 +119,40 @@ export const addMovie = async (req, res) => {
       showTimings,
     } = req.body;
 
-    if (!title || !hero || !heroine) {
-      return res.status(400).json({ success: false, message: "Title, hero, and heroine are required" });
-    }
+    // ✅ Direct Cloudinary URLs from multer-storage-cloudinary
+    const uploadedPosters = req.files.map((file) => file.path);
 
-    // Handle local files
-    const files = req.files || [];
-    const posterUrls = files.map((file) => `${file.filename}`);
-
-    // Parse show timings safely
+    // ✅ Parse show timings
     let shows = [];
     try {
       shows = showTimings ? JSON.parse(showTimings) : [];
-    } catch (err) {
+    } catch {
       shows = [];
     }
 
-    const movie = new Movie({
+    // ✅ Create and save movie
+    const newMovie = new Movie({
       title,
       cast: {
         actor: hero,
         actress: heroine,
-        villan: villain || "",
-        supporting: supportArtists || "",
+        villan: villain,
+        supporting: supportArtists,
       },
       crew: {
-        director: director || "",
-        producer: producer || "",
-        musicDirector: musicDirector || "",
-        cinematographer: cinematographer || "",
+        director,
+        producer,
+        musicDirector,
+        cinematographer,
       },
-      posters: posterUrls,
+      posters: uploadedPosters, // ✅ Cloudinary URLs auto stored
       shows,
     });
 
-    const savedMovie = await movie.save();
-
-    res.status(201).json({
-      success: true,
-      message: "Movie added successfully",
-      data: savedMovie,
-    });
+    const savedMovie = await newMovie.save();
+    res.status(201).json({ success: true, message: "Movie added successfully", data: savedMovie });
   } catch (error) {
     console.error("Error in addMovie:", error);
-    res.status(500).json({
-      success: false,
-      message: `Server Error: ${error.message}`,
-    });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
