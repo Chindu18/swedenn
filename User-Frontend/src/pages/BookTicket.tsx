@@ -156,7 +156,7 @@ const BookTicket = () => {
     if (selectedSeats.includes(seatNumber)) return "bg-seat-selected";
     return "bg-seat-unselected";
   };
-
+const [qrdata,setqrdata]=useState({});
   // -------------------- Booking --------------------
   const handleBooking = async () => {
     if (!name || !email || selectedSeats.length !== totalSeatsSelected || !ticketType || !selectedShow) {
@@ -167,7 +167,7 @@ const BookTicket = () => {
    //payment status
    const paymentStatus='pending';
     const booking: BookingData = { seatNumbers: selectedSeats,paymentStatus, adult,totalSeatsSelected, kids, ticketType, totalAmount: calculateTotal() };
-
+    
     try {
       const response = await axios.post(`${backend_url}/api/addBooking`, {
         name,
@@ -180,8 +180,9 @@ const BookTicket = () => {
       console.log(response.data);
       setBookedSeats([...bookedSeats, ...selectedSeats]);
       console.log(response.data);
+      setqrdata(response.data)
       setBookingData(booking);
-      if(response.success===true){
+      if(response.data.success===true){
         setShowQRModal(true);
       }
       
@@ -409,10 +410,14 @@ const BookTicket = () => {
             name,
             email,
             paymentStatus: "pending",
+            qrdata
           })}
           size={200}
         />
-        <p className="text-lg font-semibold">Booking ID: {bookingData.seatNumbers.join("-")}</p>
+        <p className="text-lg font-semibold">Movie: {qrdata.data.movieName}</p>
+        <p className="text-lg font-semibold">Booking ID: {qrdata.data.bookingId}</p>
+        <p className="text-lg font-semibold">seatNumbers: {qrdata.data.seatNumbers.join(", ")}</p>
+        <p className="text-lg font-semibold">totalAmount : {qrdata.data.totalAmount}</p>
         <Button onClick={() => setShowQRModal(false)} className="mt-4 bg-accent text-white">
           Close
         </Button>

@@ -34,7 +34,7 @@ export const addBooking = async (req, res) => {
     res.status(201).json({ 
       message: "Booking saved successfully",
       success: true,
-      data:booking,
+      data:booking
       bookingId 
     });
   } catch (error) {
