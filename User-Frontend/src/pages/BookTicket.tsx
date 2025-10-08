@@ -275,19 +275,24 @@ const [qrdata,setqrdata]=useState({});
                   <CreditCard className="w-8 h-8" /> PAYMENT METHOD
                 </CardTitle>
               </CardHeader>
-              <CardContent className="p-6 space-y-4">
-                <div className="flex gap-4 mb-6">
-                  {["online", "video", "sodertalije"].map((type) => (
-                    <button
-                      key={type}
-                      onClick={() => setTicketType(type)}
-                      className={`px-6 py-3 rounded-lg font-semibold text-lg border-2 transition-all duration-200
-                        ${ticketType === type ? "bg-accent text-white border-accent" : "bg-background border-border hover:border-accent"}`}
-                    >
-                      {type === "online" ? "Online Payment" : type === "video" ? "Video Speed" : "Sodertalije"}
-                    </button>
-                  ))}
-                </div>
+              <CardContent className=" md:p-6 space-y-4 ">
+                <div className="flex flex-col gap-2 pt-3 sm:flex-row sm:gap-4 mb-6">
+  {["online", "video", "sodertalije"].map((type) => (
+    <button
+      key={type}
+      onClick={() => setTicketType(type)}
+      className={`px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-semibold text-base sm:text-lg border-2 transition-all duration-200
+        ${ticketType === type ? "bg-accent text-white border-accent" : "bg-background border-border hover:border-accent"}`}
+    >
+      {type === "online"
+        ? "Online Payment"
+        : type === "video"
+        ? "Video Speed"
+        : "Sodertalije"}
+    </button>
+  ))}
+</div>
+
 
                 {ticketType && (
                   <div className="space-y-4 border-2 border-border rounded-lg p-6">
@@ -347,7 +352,7 @@ const [qrdata,setqrdata]=useState({});
           </div>
 
           {/* Seat Layout */}
-          <div className="lg:col-span-3">
+          {/* <div className="lg:col-span-3">
             <Card className="border-2 border-border shadow-2xl animate-scale-in h-full">
               <CardHeader className="bg-gradient-to-r from-cinema-black to-secondary text-white">
                 <CardTitle className="text-3xl tracking-[2px]">Select Your Seats</CardTitle>
@@ -391,13 +396,68 @@ const [qrdata,setqrdata]=useState({});
                 </div>
               </CardContent>
             </Card>
-          </div>
+          </div> */}
+          <div className="lg:col-span-3">
+  <Card className="border-2 border-border shadow-2xl animate-scale-in h-full max-w-full mx-auto">
+    <CardHeader className="bg-gradient-to-r from-cinema-black to-secondary text-white">
+      <CardTitle className="text-2xl sm:text-3xl tracking-[2px] text-center sm:text-left">
+        Select Your Seats
+      </CardTitle>
+    </CardHeader>
+    <CardContent className="p-4 sm:p-6">
+      <div className="mb-8 sm:mb-12">
+        <div className="bg-gradient-to-r from-transparent via-accent to-transparent h-1 rounded-full mb-2 sm:mb-3 shadow-lg cinema-glow"></div>
+        <p className="text-center text-base sm:text-lg font-bold text-foreground tracking-wider">
+          THIS IS THE SCREEN
+        </p>
+      </div>
+
+      {/* Scrollable seat layout */}
+      <div className="overflow-x-auto w-full">
+        <div className="inline-block min-w-max px-1 sm:px-2 space-y-2">
+          {seatLayoutSets.map((set, setIndex) => {
+            const maxCols = Math.max(...set);
+            return set.map((cols, rowIndex) => (
+              <div key={`set${setIndex}-${rowIndex}`} className="flex justify-center items-center gap-1 sm:gap-2">
+                {/* Row numbers left */}
+                <span className="text-xs sm:text-sm text-muted-foreground font-bold w-6 sm:w-8 text-right">{currentSeatNumber}</span>
+
+                {/* Seats */}
+                {Array.from({ length: maxCols }, (_, seatIndex) => {
+                  if (seatIndex < Math.floor((maxCols - cols) / 2) || seatIndex >= Math.floor((maxCols - cols) / 2) + cols) {
+                    return <div key={`empty-${setIndex}-${rowIndex}-${seatIndex}`} className="w-6 sm:w-8 h-6 sm:h-8" />;
+                  }
+                  const seatNumber = currentSeatNumber++;
+                  return (
+                    <button
+                      key={seatNumber}
+                      onClick={() => handleSeatClick(seatNumber)}
+                      className={`w-6 sm:w-8 h-6 sm:h-8 text-[9px] sm:text-[11px] rounded ${getSeatColor(seatNumber)} 
+                        hover:opacity-80 transition-all duration-200 font-bold text-white flex items-center justify-center shadow`}
+                      disabled={bookedSeats.includes(seatNumber)}
+                    >
+                      {seatNumber}
+                    </button>
+                  );
+                })}
+
+                {/* Row numbers right */}
+                <span className="text-xs sm:text-sm text-muted-foreground font-bold w-6 sm:w-8 text-left">{currentSeatNumber - 1}</span>
+              </div>
+            ));
+          })}
+        </div>
+      </div>
+    </CardContent>
+  </Card>
+</div>
+
         </div>
       </div>
 
       {/* QR Code Modal */}
       {/* QR Code Modal */}
-<Dialog open={showQRModal} onOpenChange={setShowQRModal}>
+{/* <Dialog open={showQRModal} onOpenChange={setShowQRModal}>
   <DialogContent className="sm:max-w-[400px] rounded-2xl p-6 text-center">
     <DialogHeader>
       <DialogTitle className="text-2xl font-bold">Your Booking QR Code</DialogTitle>
@@ -424,7 +484,36 @@ const [qrdata,setqrdata]=useState({});
       </div>
     )}
   </DialogContent>
+</Dialog> */}
+<Dialog open={showQRModal} onOpenChange={setShowQRModal}>
+  <DialogContent className="w-full max-w-sm sm:max-w-[400px] rounded-2xl p-6 text-center">
+    <DialogHeader>
+      <DialogTitle className="text-xl sm:text-2xl font-bold">Your Booking QR Code</DialogTitle>
+    </DialogHeader>
+
+    {bookingData && (
+      <div className="flex flex-col items-center gap-4 mt-4">
+        <QRCodeSVG
+          value={JSON.stringify({
+            name,
+            email,
+            paymentStatus: "pending",
+            qrdata
+          })}
+          size={Math.min(window.innerWidth * 0.6, 200)} // scales QR on small screens
+        />
+        <p className="text-sm sm:text-lg font-semibold">Movie: {qrdata.data.movieName}</p>
+        <p className="text-sm sm:text-lg font-semibold">Booking ID: {qrdata.data.bookingId}</p>
+        <p className="text-sm sm:text-lg font-semibold">Seats: {qrdata.data.seatNumbers.join(", ")}</p>
+        <p className="text-sm sm:text-lg font-semibold">Total Amount: ₹{qrdata.data.totalAmount}</p>
+        <Button onClick={() => setShowQRModal(false)} className="mt-4 bg-accent text-white">
+          Close
+        </Button>
+      </div>
+    )}
+  </DialogContent>
 </Dialog>
+
 
     </div>
   );
