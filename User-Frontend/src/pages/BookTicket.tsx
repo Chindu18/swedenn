@@ -177,10 +177,14 @@ const BookTicket = () => {
         ...booking,
         movieName:movie.title
       });
-
+      console.log(response.data);
       setBookedSeats([...bookedSeats, ...selectedSeats]);
+      console.log(response.data);
       setBookingData(booking);
-      setShowQRModal(true);
+      if(response.success===true){
+        setShowQRModal(true);
+      }
+      
 
       toast({ title: "Booking Successful!", description: "Your ticket has been booked." });
 
@@ -391,31 +395,35 @@ const BookTicket = () => {
       </div>
 
       {/* QR Code Modal */}
-      <Dialog open={showQRModal} onOpenChange={setShowQRModal}>
-        <DialogContent className="sm:max-w-md bg-white">
-          <DialogHeader>
-            <DialogTitle className="text-center text-3xl text-foreground font-bold">🎉 Booking Confirmed!</DialogTitle>
-          </DialogHeader>
-          <div className="flex flex-col items-center space-y-6 py-6">
-            {bookingData && (
-              <>
-                <div className="p-6 bg-gradient-to-br from-accent/10 to-accent/5 rounded-2xl shadow-xl">
-                  <QRCodeSVG value={JSON.stringify(bookingData)} size={220} level="H" includeMargin={true} />
-                </div>
-                <div className="text-center space-y-3 w-full bg-muted/30 p-6 rounded-xl">
-                   <p className="text-3xl font-bold text-green-500">MOVIE:{movie.title}</p> 
-                  <p className="text-sm text-muted-foreground"><span className="font-semibold text-foreground text-lg">Seats:</span> {bookingData.seatNumbers.join(", ")}</p>
-                  <p className="text-2xl font-bold text-accent">₹{bookingData.totalAmount}</p>
-                  <p className="text-sm text-muted-foreground">Show: {selectedShow?.date} {selectedShow?.time}</p>
-                </div>
-              </>
-            )}
-            <Button onClick={() => setShowQRModal(false)} className="w-full bg-accent hover:bg-accent/90 text-white font-bold py-4 rounded-lg">Close</Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      {/* QR Code Modal */}
+<Dialog open={showQRModal} onOpenChange={setShowQRModal}>
+  <DialogContent className="sm:max-w-[400px] rounded-2xl p-6 text-center">
+    <DialogHeader>
+      <DialogTitle className="text-2xl font-bold">Your Booking QR Code</DialogTitle>
+    </DialogHeader>
+
+    {bookingData && (
+      <div className="flex flex-col items-center gap-4 mt-4">
+        <QRCodeSVG
+          value={JSON.stringify({
+            name,
+            email,
+            paymentStatus: "pending",
+          })}
+          size={200}
+        />
+        <p className="text-lg font-semibold">Booking ID: {bookingData.seatNumbers.join("-")}</p>
+        <Button onClick={() => setShowQRModal(false)} className="mt-4 bg-accent text-white">
+          Close
+        </Button>
+      </div>
+    )}
+  </DialogContent>
+</Dialog>
+
     </div>
   );
 };
 
 export default BookTicket;
+
