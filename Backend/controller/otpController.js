@@ -35,7 +35,7 @@ export const sendOTP = async (req, res) => {
     setTimeout(() => delete otpStore[email], 120000);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ success: false, message: "Failed to send OTP" });
+    res.status(500).json({ success: false, message: "Failed to send OTP",error });
   }
 };
 
