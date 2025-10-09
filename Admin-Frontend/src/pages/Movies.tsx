@@ -63,6 +63,7 @@ const Movies = () => {
     try {
       const res = await axios.get(`${backend_url}/movie/getmovie`);
       setMovies(res.data.data);
+      console.log(res.data.data)
     } catch (err) {
       console.error("Error fetching movies:", err);
     }
@@ -152,7 +153,7 @@ const Movies = () => {
 const getPosterSrc = (poster: File | string) =>
   poster instanceof File
     ? URL.createObjectURL(poster)
-    : `${backend_url}/uploads/${poster}`;
+    : poster;
 
   // ---------------------- JSX ----------------------
   return (
@@ -217,7 +218,7 @@ const getPosterSrc = (poster: File | string) =>
             {formData.shows.map((show, idx) => (
               <div key={idx} className="border p-3 rounded mb-3 space-y-2">
                 <input type="date" value={show.date} onChange={(e) => handleShowChange(idx, "date", null, null, e.target.value)} className="border p-2 w-full rounded" required />
-                <input type="text" placeholder="Show Time" value={show.time} onChange={(e) => handleShowChange(idx, "time", null, null, e.target.value)} className="border p-2 w-full rounded" required />
+                <input type="time" placeholder="Show Time" value={show.time} onChange={(e) => handleShowChange(idx, "time", null, null, e.target.value)} className="border p-2 w-full rounded" required />
 
                 <div className="grid grid-cols-3 gap-2">
                   {(["online", "videoSpeed", "soder"] as const).map((method) => (
@@ -243,7 +244,7 @@ const getPosterSrc = (poster: File | string) =>
 
       {/* Movie Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {movies.map((movie) => (
+        {movies.slice(-5).reverse().map((movie) => (
           <Card key={movie._id} className="cursor-pointer hover:shadow-lg" onClick={() => setModalMovie(movie)}>
             <img src={getPosterSrc(movie.posters[0])} alt={movie.title} className="w-full h-64 object-cover" />
             <CardContent className="flex justify-between p-3">

@@ -6,8 +6,9 @@ const showPricesSchema = new mongoose.Schema({
 });
 
 const showSchema = new mongoose.Schema({
-  date: { type: String, required: true }, // store as string from frontend
-  time: { type: String, required: true },
+  date: { type: Date, required: true },   // for the date (e.g., 2025-10-09)
+  time: { type: String, required: true }, // for the time (e.g., "10:00 AM")
+
   prices: {
     online: { type: showPricesSchema, default: {},required: true },
     videoSpeed: { type: showPricesSchema, default: {},required: true },
