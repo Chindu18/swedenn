@@ -90,6 +90,7 @@ const sendOtp = async () => {
     toast({ title: "OTP Sent", description: "Check your email for OTP." });
   } catch (err) {
     toast({ title: "Failed to send OTP", description: "Try again.", variant: "destructive" });
+    console.log(err.message)
   }
 };
 
