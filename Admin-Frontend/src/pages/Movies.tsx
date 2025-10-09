@@ -249,10 +249,7 @@ const getPosterSrc = (poster: File | string) =>
             <img src={getPosterSrc(movie.posters[0])} alt={movie.title} className="w-full h-64 object-cover" />
             <CardContent className="flex justify-between p-3">
               <span>
-                Paid: <IndianRupee className="h-4 w-4 inline" /> 0
-              </span>
-              <span>
-                Pending: <IndianRupee className="h-4 w-4 inline" /> 0
+                {movie.title}
               </span>
             </CardContent>
           </Card>
