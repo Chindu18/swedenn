@@ -50,3 +50,65 @@ export const verifyOTP = (req, res) => {
 
   res.json({ success: false, message: "Invalid or expired OTP" });
 };
+
+
+
+//booking confirmation mail
+
+export const confirmMail=async(req,res)=>{
+
+  
+  const { email } = req.body;
+ 
+
+  const transporter = nodemailer.createTransport({
+  host: "smtp.gmail.com",
+  port: 587,
+  secure: false, // true for 465, false for other ports
+  auth: {
+    user: process.env.email_name,
+    pass: process.env.email_pass,
+  },
+});
+
+const mailOptions = {
+  from: process.env.email_name,
+  to: email,
+  subject: "Your Movie Confirmation",
+  html: `
+    <div style="font-family: Arial, sans-serif; background-color: #1c1c1c; color: #fff; padding: 20px;">
+      <h2 style="color: #e50914;">🎬 Movie Ticket Confirmation</h2>
+      <p>Hi,</p>
+      <p>Your payment was successful and your movie ticket has been booked!</p>
+
+      <div style="background-color: #2c2c2c; border-radius: 10px; padding: 15px; margin-top: 20px; text-align: center;">
+        <h3 style="color: #e50914;">Your Ticket</h3>
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=Ticket12345" alt="QR Code" style="margin: 15px 0;" />
+        <p><strong>Movie:</strong> Avengers: Endgame</p>
+        <p><strong>Date:</strong> 12 Oct 2025</p>
+        <p><strong>Time:</strong> 7:30 PM</p>
+        <p><strong>Seat:</strong> D12</p>
+        <p><strong>Booking ID:</strong> #Ticket12345</p>
+      </div>
+
+      <p>Show this QR code at the theater entrance.</p>
+    </div>
+  `,
+};
+
+
+  try {
+    await transporter.sendMail(mailOptions);
+    
+    res.json({ success: true, message: "movie booking confirmation mail sended!" });
+
+    
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Failed to send email for confirmation" });
+  }
+}
+
+export const holdingConfirm=async(req,res)=>{
+  
+}

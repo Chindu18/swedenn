@@ -39,11 +39,23 @@ interface Movie {
   shows: Show[];
   bookingOpenDays: number;
 }
+const formatTime = (timeString) => {
+  const [hour, minute] = timeString.split(':');
+  const date = new Date();
+  date.setHours(hour, minute);
+  return date.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+};
+
+const formatDate = (dateString) => {
+  const options = { weekday: 'short', day: 'numeric', month: 'short' };
+  return new Date(dateString).toLocaleDateString(undefined, options);
+};
+
 
 
 //otp
 
-const backend_url='http://localhost:8004'
+const backend_url='https://swedenn-backend.onrender.com/'
 
 const BookTicket = () => {
   // -------------------- State --------------------
@@ -304,8 +316,8 @@ const [qrdata,setqrdata]=useState({});
                         className={`border rounded-lg p-3 text-center cursor-pointer transition-all
                           ${selectedShowId === index ? "bg-accent text-white border-accent" : "bg-background border-border hover:border-accent"}`}
                       >
-                        <p className="font-semibold">{show.time}</p>
-                        <p className="text-sm">{show.date}</p>
+                        <p className="font-semibold">{formatTime(show.time)}</p>
+                        <p className="text-sm">{formatDate(show.date)}</p>
                       </button>
                     ))}
                   </div>
