@@ -45,7 +45,7 @@ export const verifyOTP = (req, res) => {
 
   if (otpStore[email] && otpStore[email] == otp) {
     delete otpStore[email];
-    return res.json({ success: true, message: "OTP verified successfully!" });
+    return res.json({ success:true, message: "OTP verified successfully!" });
   }
 
   res.json({ success: false, message: "Invalid or expired OTP" });

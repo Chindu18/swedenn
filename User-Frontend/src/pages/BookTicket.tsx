@@ -43,7 +43,7 @@ interface Movie {
 
 //otp
 
-const backend_url='https://swedenn-backend.onrender.com'
+const backend_url='http://localhost:8004'
 
 const BookTicket = () => {
   // -------------------- State --------------------
@@ -77,32 +77,40 @@ const [otpSent, setOtpSent] = useState(false);
 const [otpVerified, setOtpVerified] = useState(false);
 
 // Send OTP to user's email
-const sendOtp = async () => {
-  if (!email) {
-    toast({ title: "Enter Email", description: "Please enter your email first.", variant: "destructive" });
-    return;
-  }
 
-  try {
-    const res = await axios.post(`${backend_url}/otp/send-otp`, { email });
-    setGeneratedOtp(res.data.otp); // backend returns OTP
-    setOtpSent(true);
-    toast({ title: "OTP Sent", description: "Check your email for OTP." });
-  } catch (err) {
-    toast({ title: "Failed to send OTP", description: "Try again.", variant: "destructive" });
-    console.log(err.message)
-  }
-};
+  // Send OTP
+  const sendOtp = async () => {
+    if (!email) {
+      toast({ title: "Enter Email", description: "Please enter your email first.", variant: "destructive" });
+      return;
+    }
 
-// Verify OTP
-const verifyOtp = () => {
-  if (otp === generatedOtp) {
-    setOtpVerified(true);
-    toast({ title: "OTP Verified", description: "You can now book your tickets." });
-  } else {
-    toast({ title: "Invalid OTP", description: "Please enter the correct OTP.", variant: "destructive" });
-  }
-};
+    try {
+      await axios.post(`${backend_url}/otp/send-otp`, { email });
+      setOtpSent(true);
+      toast({ title: "OTP Sent", description: "Check your email for OTP." });
+    } catch (err) {
+      toast({ title: "Failed to send OTP", description: "Try again.", variant: "destructive" });
+      console.log(err.message);
+    }
+  };
+
+  // Verify OTP
+  const verifyOtp = async () => {
+    try {
+      const res = await axios.post(`${backend_url}/otp/verify-otp`, { email, otp });
+      if (res.data.success) {
+        setOtpVerified(true);
+        toast({ title: "OTP Verified", description: "You can now book your tickets." });
+      } else {
+        toast({ title: "Invalid OTP", description: res.data.message, variant: "destructive" });
+      }
+    } catch (err) {
+      toast({ title: "Failed to verify OTP", description: "Try again.", variant: "destructive" });
+      console.log(err.message);
+    }
+  };
+
 
 
   // -------------------- Fetch Movie --------------------
@@ -438,42 +446,51 @@ const [qrdata,setqrdata]=useState({});
               </CardContent>
             </Card>
           {/* OTP Section */}
-                <div className="mb-4 space-y-3">
-                  <Label htmlFor="otp" className="text-lg flex items-center gap-2">
-                    OTP
-                  </Label>
-                  
-                  {/* Input field for entering OTP */}
-                  <Input
-                    id="otp"
-                    type="text"
-                    value={otp}
-                    onChange={(e) => setOtp(e.target.value)}
-                    placeholder="Enter OTP"
-                    className="text-lg p-4 border-2 focus:border-accent"
-                    disabled={!otpSent} // disable until OTP is sent
-                  />
+               <div className="mb-4 space-y-3">
+                    <Label htmlFor="otp" className="text-lg flex items-center gap-2">
+                      OTP
+                    </Label>
 
-                  <div className="flex gap-3">
-                    {/* Send OTP Button */}
-                    <Button
-                      onClick={sendOtp}
-                      className="bg-accent text-white flex-1"
-                      disabled={otpSent}
-                    >
-                      {otpSent ? "OTP Sent" : "Send OTP"}
-                    </Button>
+                    {/* Input field for entering OTP */}
+                    <Input
+                      id="otp"
+                      type="text"
+                      value={otp}
+                      onChange={(e) => setOtp(e.target.value)}
+                      placeholder="Enter OTP"
+                      className="text-lg p-4 border-2 focus:border-accent"
+                      disabled={!otpSent || otpVerified} // disable until OTP is sent or already verified
+                    />
 
-                    {/* Verify OTP Button */}
-                    <Button
-                      onClick={verifyOtp}
-                      className="bg-green-600 text-white flex-1"
-                      disabled={!otpSent || otpVerified}
-                    >
-                      {otpVerified ? "Verified" : "Verify OTP"}
-                    </Button>
+                    <div className="flex gap-3">
+                      {/* Send OTP Button */}
+                      <Button
+                        onClick={sendOtp}
+                        className="bg-accent text-white flex-1"
+                        disabled={otpSent} // disable if OTP already sent
+                      >
+                        {otpSent ? "OTP Sent" : "Send OTP"}
+                      </Button>
+
+                      {/* Verify OTP Button */}
+                      <Button
+                        onClick={verifyOtp}
+                        className="bg-green-600 text-white flex-1"
+                        disabled={!otpSent || otpVerified || otp.length !== 6} // disable if OTP not sent, verified, or invalid length
+                      >
+                        {otpVerified ? "Verified" : "Verify OTP"}
+                      </Button>
+                    </div>
+
+                    {/* Optional status message */}
+                    {otpVerified && (
+                      <p className="text-green-600 font-medium mt-2">
+                        OTP Verified! You can now proceed.
+                      </p>
+                    )}
                   </div>
-                </div>
+
+
 
             <Button
               onClick={handleBooking}
