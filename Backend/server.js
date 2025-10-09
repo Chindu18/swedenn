@@ -13,6 +13,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 import path from 'path';
 import dashboardRouter from './Routes/dashboard.js';
+import otprouter from './Routes/otp.js';
 
 // Serve the uploads folder inside movies
 app.use('/uploads', express.static(path.join(process.cwd(), 'uploads/movies')));
@@ -24,6 +25,10 @@ app.use('/uploads', express.static(path.join(process.cwd(), 'uploads/movies')));
 app.use('/api', userRouter);
 app.use('/movie',movieRouter);
 app.use('/dashboard',dashboardRouter);
+
+//otp routes
+app.use('/otp',otprouter)
+
 // Root test
 app.get("/", (req, res) => res.send("Backend server running"));
 

@@ -41,6 +41,8 @@ interface Movie {
 }
 
 
+//otp
+
 const backend_url='https://swedenn-backend.onrender.com'
 
 const BookTicket = () => {
@@ -67,6 +69,40 @@ const BookTicket = () => {
 
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
+
+  //otp
+const [otp, setOtp] = useState("");        // user-entered OTP
+const [generatedOtp, setGeneratedOtp] = useState(""); // OTP from backend
+const [otpSent, setOtpSent] = useState(false);
+const [otpVerified, setOtpVerified] = useState(false);
+
+// Send OTP to user's email
+const sendOtp = async () => {
+  if (!email) {
+    toast({ title: "Enter Email", description: "Please enter your email first.", variant: "destructive" });
+    return;
+  }
+
+  try {
+    const res = await axios.post(`${backend_url}/otp/send-otp`, { email });
+    setGeneratedOtp(res.data.otp); // backend returns OTP
+    setOtpSent(true);
+    toast({ title: "OTP Sent", description: "Check your email for OTP." });
+  } catch (err) {
+    toast({ title: "Failed to send OTP", description: "Try again.", variant: "destructive" });
+  }
+};
+
+// Verify OTP
+const verifyOtp = () => {
+  if (otp === generatedOtp) {
+    setOtpVerified(true);
+    toast({ title: "OTP Verified", description: "You can now book your tickets." });
+  } else {
+    toast({ title: "Invalid OTP", description: "Please enter the correct OTP.", variant: "destructive" });
+  }
+};
+
 
   // -------------------- Fetch Movie --------------------
   useEffect(() => {
@@ -400,14 +436,53 @@ const [qrdata,setqrdata]=useState({});
                 </div>
               </CardContent>
             </Card>
+          {/* OTP Section */}
+                <div className="mb-4 space-y-3">
+                  <Label htmlFor="otp" className="text-lg flex items-center gap-2">
+                    OTP
+                  </Label>
+                  
+                  {/* Input field for entering OTP */}
+                  <Input
+                    id="otp"
+                    type="text"
+                    value={otp}
+                    onChange={(e) => setOtp(e.target.value)}
+                    placeholder="Enter OTP"
+                    className="text-lg p-4 border-2 focus:border-accent"
+                    disabled={!otpSent} // disable until OTP is sent
+                  />
+
+                  <div className="flex gap-3">
+                    {/* Send OTP Button */}
+                    <Button
+                      onClick={sendOtp}
+                      className="bg-accent text-white flex-1"
+                      disabled={otpSent}
+                    >
+                      {otpSent ? "OTP Sent" : "Send OTP"}
+                    </Button>
+
+                    {/* Verify OTP Button */}
+                    <Button
+                      onClick={verifyOtp}
+                      className="bg-green-600 text-white flex-1"
+                      disabled={!otpSent || otpVerified}
+                    >
+                      {otpVerified ? "Verified" : "Verify OTP"}
+                    </Button>
+                  </div>
+                </div>
 
             <Button
               onClick={handleBooking}
               className="w-full bg-accent hover:bg-accent/90 text-white font-bold text-2xl py-8 rounded-xl shadow-2xl cinema-glow hover:scale-105 transition-all duration-300"
               size="lg"
+              disabled={!otpVerified} // prevent booking until OTP is verified
             >
               Book Now
             </Button>
+
           </div>
 
           {/* Seat Layout */}
