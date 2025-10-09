@@ -55,7 +55,7 @@ const formatDate = (dateString) => {
 
 //otp
 
-const backend_url='https://swedenn-backend.onrender.com/'
+const backend_url='https://swedenn-backend.onrender.com'
 
 const BookTicket = () => {
   // -------------------- State --------------------
@@ -131,6 +131,7 @@ const [otpVerified, setOtpVerified] = useState(false);
       try {
         const response = await axios.get(`${backend_url}/movie/getmovie`);
         const data = response.data.data;
+        console.log(data)
         if (data && data.length > 0) {
           const lastMovie = data[data.length - 1];
           setMovie(lastMovie);

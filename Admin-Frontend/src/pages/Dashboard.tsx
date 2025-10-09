@@ -7,7 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import axios from "axios";
 
 const Dashboard = () => {
-  const backend_url = "https://swedenn-backend.onrender.com/";
+  const backend_url = "https://swedenn-backend.onrender.com";
 
   const [movie, setMovie] = useState({});
   const [allBookings, setAllBookings] = useState([]);
