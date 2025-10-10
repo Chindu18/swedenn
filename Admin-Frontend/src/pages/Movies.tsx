@@ -54,7 +54,8 @@ const formatDate = (dateString) => {
 };
 
 
-const Movies = () => {
+const Movies =() => {
+ 
   const backend_url = 'https://swedenn-backend.onrender.com';
   const [movies, setMovies] = useState<Movie[]>([]);
   const [showForm, setShowForm] = useState(false);

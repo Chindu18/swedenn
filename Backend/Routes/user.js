@@ -11,4 +11,5 @@ userRouter.post("/addDetails", upload.array("photos", 3), addMovie);
 
 userRouter.get('/bookingid/:bookingId', getBookingById);
 
+
 export default userRouter;

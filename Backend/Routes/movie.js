@@ -5,4 +5,5 @@ const movieRouter=express.Router();
 
 movieRouter.get('/getmovie',getMovie)
 
+
 export default movieRouter

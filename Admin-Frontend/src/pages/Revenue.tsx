@@ -1,3 +1,5 @@
+
+
 import { useState, useEffect } from "react";
 import { IndianRupee, X } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -41,44 +43,52 @@ interface Movie {
   shows: Show[];
 }
 
-const formatTime = (timeString) => {
-  const [hour, minute] = timeString.split(':');
-  const date = new Date();
-  date.setHours(hour, minute);
-  return date.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
-};
-
-const formatDate = (dateString) => {
-  const options = { weekday: 'short', day: 'numeric', month: 'short' };
-  return new Date(dateString).toLocaleDateString(undefined, options);
-};
-
-
 const Revenue = () => {
-  const backend_url = 'https://swedenn-backend.onrender.com';
+  const backend_url = "https://swedenn-backend.onrender.com";
+
   const [movies, setMovies] = useState<Movie[]>([]);
-  const [showForm, setShowForm] = useState(false);
+  const [revenueData, setRevenueData] = useState<Record<string, { paid: number; pending: number }>>({});
   const [modalMovie, setModalMovie] = useState<Movie | null>(null);
 
-  const initialFormData: Omit<Movie, "_id"> & { posters: File[] } = {
-    title: "",
-    cast: { actor: "", actress: "", villan: "", supporting: "" },
-    crew: { director: "", producer: "", musicDirector: "", cinematographer: "" },
-    posters: [],
-    shows: [],
+  const formatTime = (timeString: string) => {
+    const [hour, minute] = timeString.split(":");
+    const date = new Date();
+    date.setHours(Number(hour), Number(minute));
+    return date.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
   };
 
-  const [formData, setFormData] = useState(initialFormData);
-  const [posterPreviews, setPosterPreviews] = useState<string[]>([]);
+  const formatDate = (dateString: string) => {
+    const options = { weekday: "short", day: "numeric", month: "short" };
+    return new Date(dateString).toLocaleDateString(undefined, options);
+  };
 
-  // ---------------------- Fetch existing movies ----------------------
+  // ---------------------- Fetch Movies & Revenue ----------------------
   const fetchMovies = async () => {
     try {
       const res = await axios.get(`${backend_url}/movie/getmovie`);
-      setMovies(res.data.data);
-      console.log(res.data.data)
+      const moviesData: Movie[] = res.data.data;
+      setMovies(moviesData);
+
+      const revData: Record<string, { paid: number; pending: number }> = {};
+
+      // Fetch revenue for each movie
+      await Promise.all(
+        moviesData.map(async (movie) => {
+          const [pendingResp, paidResp] = await Promise.all([
+            axios.get(`${backend_url}/dashboard/pending`, { params: { movieName: movie.title, paymentStatus: "pending" } }),
+            axios.get(`${backend_url}/dashboard/pending`, { params: { movieName: movie.title, paymentStatus: "paid" } }),
+          ]);
+
+          revData[movie.title] = {
+            pending: pendingResp.data.data?.reduce((sum: number, b: any) => sum + b.totalAmount, 0) || 0,
+            paid: paidResp.data.data?.reduce((sum: number, b: any) => sum + b.totalAmount, 0) || 0,
+          };
+        })
+      );
+
+      setRevenueData(revData);
     } catch (err) {
-      console.error("Error fetching movies:", err);
+      console.error("Error fetching movies or revenue:", err);
     }
   };
 
@@ -86,54 +96,21 @@ const Revenue = () => {
     fetchMovies();
   }, []);
 
-  // ---------------------- Input Handlers ----------------------
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    section?: keyof Omit<Movie, "_id" | "title" | "posters" | "shows">,
-    key?: string
-  ) => {
-    const { value, name } = e.target;
-    if (section && key) {
-      setFormData({ ...formData, [section]: { ...formData[section], [key]: value } });
-    } else {
-      setFormData({ ...formData, [name]: value });
-    }
-  };
+  const getPosterSrc = (poster: File | string) =>
+    poster instanceof File ? URL.createObjectURL(poster) : poster;
 
-  const handlePosterUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files ?? []).slice(0, 3);
-    setFormData({ ...formData, posters: files });
-    setPosterPreviews(files.map((f) => URL.createObjectURL(f)));
-  };
-
-  // ---------------------- Shows ----------------------
- 
-
-  // ---------------------- Submit Form ----------------------
-  
-const getPosterSrc = (poster: File | string) =>
-  poster instanceof File
-    ? URL.createObjectURL(poster)
-    : poster;
-
-  // ---------------------- JSX ----------------------
   return (
     <div className="min-h-screen bg-background p-8">
-      
-
-     
-
       {/* Movie Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {movies.reverse().map((movie) => (
+        {[...movies].reverse().map((movie) => (
           <Card key={movie._id} className="cursor-pointer hover:shadow-lg" onClick={() => setModalMovie(movie)}>
             <img src={getPosterSrc(movie.posters[0])} alt={movie.title} className="w-full h-64 object-cover" />
-            <CardContent className="flex justify-between p-3">
+            <CardContent className="flex flex-col gap-2 p-3">
+              <span className="font-bold">{movie.title}</span>
               <span>
-                {movie.title}
-              </span>
-              <span>
-                Revenue:{movie.title}
+                <strong>Paid:</strong> ₹{revenueData[movie.title]?.paid || 0} &nbsp;
+                <strong>Pending:</strong> ₹{revenueData[movie.title]?.pending || 0}
               </span>
             </CardContent>
           </Card>
