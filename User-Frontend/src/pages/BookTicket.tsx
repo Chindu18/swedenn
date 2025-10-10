@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { QRCodeSVG } from "qrcode.react";
 import { toast } from "@/hooks/use-toast";
 import { Users, Ticket, CreditCard, Film } from "lucide-react";
+import { toDataURL } from 'qrcode';
 
 interface BookingData {
   seatNumbers: number[];
@@ -88,7 +89,31 @@ const [generatedOtp, setGeneratedOtp] = useState(""); // OTP from backend
 const [otpSent, setOtpSent] = useState(false);
 const [otpVerified, setOtpVerified] = useState(false);
 
+
+
+
+// Send the generated QR data to backend for email
+const sendQrEmail = async (qrPayload: any) => {
+  try {
+    const res = await axios.post(`${backend_url}/send-qr-email`, {
+      email: qrPayload.email,
+      qrData: qrPayload,
+      bookingId: qrPayload.qrdata.data.bookingId,
+    });
+    if (res.data.success) {
+      toast({ title: "Email Sent", description: "QR code sent to your email." });
+    } else {
+      toast({ title: "Failed to send", description: "Could not send QR code email.", variant: "destructive" });
+    }
+  } catch (err) {
+    console.error(err);
+    toast({ title: "Error", description: "Something went wrong sending email.", variant: "destructive" });
+  }
+};
+
+
 // Send OTP to user's email
+
 
   // Send OTP
   const sendOtp = async () => {
@@ -219,6 +244,7 @@ const [qrdata,setqrdata]=useState({});
   const handleBooking = async () => {
     if (!name || !email || selectedSeats.length !== totalSeatsSelected || !ticketType || !selectedShow) {
       toast({ title: "Missing Information", description: "Please fill all fields and select seats.", variant: "destructive" });
+      
       return;
     }
 
@@ -240,9 +266,25 @@ const [qrdata,setqrdata]=useState({});
       console.log(response.data);
       setqrdata(response.data)
       setBookingData(booking);
-      if(response.data.success===true){
-        setShowQRModal(true);
-      }
+      if (response.data.success === true) {
+      setShowQRModal(true);
+     
+
+      // Inside handleBooking
+      const qrBase64 = await toDataURL(JSON.stringify({
+        name,
+        email,
+        paymentStatus: "pending",
+        qrdata
+      }));
+
+// Then send `qrBase64` to backend along with other details
+
+
+      // ✅ Send QR to backend immediately after booking
+      sendQrEmail(response.data);
+        }
+
       
 
       toast({ title: "Booking Successful!", description: "Your ticket has been booked." });

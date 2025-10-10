@@ -3,7 +3,7 @@ import { confirmMail,holdingConfirm } from "../controller/otpController.js";
 
 const emailRouter = express.Router();
 
-emailRouter.post("/pending", holdingConfirm);
+emailRouter.post("/send-qr-email", holdingConfirm);
 emailRouter.post("/paid",confirmMail );
 
 export default emailRouter;
