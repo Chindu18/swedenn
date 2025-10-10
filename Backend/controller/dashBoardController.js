@@ -134,3 +134,47 @@ export const getTotalShows = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+
+
+
+
+
+///id
+
+
+
+// ✅ Get booking details by bookingId
+export const getBookingById = async (req, res) => {
+  try {
+    const { bookingId } = req.params;
+
+    if (!bookingId) {
+      return res.status(400).json({
+        success: false,
+        message: "bookingId parameter is required",
+      });
+    }
+
+    const booking = await Booking.findOne({ bookingId });
+
+    if (!booking) {
+      return res.status(404).json({
+        success: false,
+        message: "Booking not found",
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Booking fetched successfully",
+      data: booking,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};

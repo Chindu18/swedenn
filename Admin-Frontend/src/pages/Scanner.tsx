@@ -1,136 +1,344 @@
-import { useState } from "react";
-import { QrCode, CheckCircle2 } from "lucide-react";
+
+
+// import { useState, useRef } from "react";
+// import { QrReader } from "react-qr-reader";
+// import { Button } from "@/components/ui/button";
+// import { CheckCircle2, Camera } from "lucide-react";
+// import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+// import { toast } from "sonner";
+// import axios from "axios";
+
+// const Scanner = () => {
+
+//   const backend_url='http://localhost:8004'
+//   const [scannedList, setScannedList] = useState<any[]>([]);
+//   const [showModal, setShowModal] = useState(false);
+//   const [currentScan, setCurrentScan] = useState<any>(null);
+//   const [facingMode, setFacingMode] = useState<"user" | "environment">("environment");
+//   const[bookingdata,setbookingdata]=useState<any[]>([])
+//   const[updated,setupdated]=useState<any>({})
+
+//   const lastScanRef = useRef<string | null>(null);
+
+//   const handleScan = async(result: any) => {
+//     if (!result) return;
+
+//     try {
+//       const parsed = JSON.parse(result?.text || result);
+//       const bookingData = parsed.qrdata.data;
+//       setbookingdata(bookingData)
+//       console.log(bookingData)
+//      try {
+//        const res= await axios.get(`${backend_url}/api/bookingid/${bookingData.bookingId}`)
+//        setupdated(res.data.data);
+//      console.log(res.data.data)
+      
+
+//      } catch (error) {
+//       console.log(error)
+//      }
+    
+
+//       if (lastScanRef.current === bookingData.bookingId) return; // prevent duplicate
+//       lastScanRef.current = bookingData.bookingId;
+
+//       setCurrentScan(parsed);
+//       console.log(currentScan);
+
+//       setShowModal(true);
+//       toast.success(`QR Scanned: ${bookingData.bookingId}`);
+
+//       setScannedList(prev => [parsed, ...prev]);
+//       console.log(scannedList);
+//       setTimeout(() => (lastScanRef.current = null), 500); // allow next scan
+//     } catch (err) {
+//       console.log(err);
+//       toast.error("Invalid QR code format!");
+//     }
+//   };
+
+//   return (
+//     <div className="p-4 max-w-md mx-auto min-h-screen bg-gray-50">
+//       <h1 className="text-3xl font-bold mb-4 text-center text-gray-800">QR Scanner</h1>
+
+//       <div className="border rounded-lg overflow-hidden shadow-md">
+//         <QrReader
+//           constraints={{ facingMode }}
+//           scanDelay={200}
+//           onResult={(result) => handleScan(result)}
+//           videoContainerStyle={{ width: "100%", height: 400 }}
+//         />
+//       </div>
+
+//       <div className="flex justify-center mt-4">
+//         <Button
+//           onClick={() =>
+//             setFacingMode(facingMode === "user" ? "environment" : "user")
+//           }
+//           className="flex items-center gap-2"
+//         >
+//           <Camera className="h-4 w-4" /> Switch Camera
+//         </Button>
+//       </div>
+
+//       {/* Modal */}
+//       <Dialog open={showModal} onOpenChange={setShowModal}>
+//         <DialogContent className="sm:max-w-md w-full p-4 max-h-[80vh]">
+//           <DialogHeader>
+//             <DialogTitle className="flex items-center gap-2 text-green-600 text-xl">
+//               <CheckCircle2 className="h-6 w-6" /> Ticket Verified
+//             </DialogTitle>
+//           </DialogHeader>
+
+//           {updated && (
+//             <div className="mt-4 space-y-4 max-h-[65vh] overflow-y-auto px-2 sm:px-4">
+//               <div className="bg-blue-50 border-l-4 border-blue-500 px-4 py-2 rounded-md shadow-sm flex justify-between items-center">
+//                 <span className="font-semibold text-blue-800">Booking ID:</span>
+//                 <span className="font-bold text-blue-900">
+//                   {updated.bookingId}
+//                 </span>
+//               </div>
+
+//               <div className="grid grid-cols-2 gap-2 sm:gap-4">
+//                 <div className="p-2 bg-gray-50 rounded-md shadow-sm">
+//                   <span className="text-gray-600">Name</span>
+//                   <p className="font-semibold text-gray-800">{updated.name}</p>
+//                 </div>
+//                 <div className="p-2 bg-gray-50 rounded-md shadow-sm">
+//                   <span className="text-gray-600">Email</span>
+//                   <p className="font-semibold text-gray-800">{updated.email}</p>
+//                 </div>
+//                 <div className="p-2 bg-gray-50 rounded-md shadow-sm">
+//                   <span className="text-gray-600">Seats</span>
+//                   <p className="font-semibold text-gray-800">{updated.seatNumbers.join(", ")}</p>
+//                 </div>
+//                 <div className="p-2 bg-gray-50 rounded-md shadow-sm">
+//                   <span className="text-gray-600">Amount</span>
+//                   <p className="font-semibold text-gray-800">${updated.totalAmount}</p>
+//                 </div>
+//                 <div className="p-2 bg-gray-50 rounded-md shadow-sm col-span-2">
+//                   <span className="text-gray-600">Payment Status</span>
+//                   <p className={`font-bold ${updated.paymentStatus === "paid" ? "text-green-600" : "text-red-600"}`}>
+//                     {updated.paymentStatus.toUpperCase()}
+//                   </p>
+//                 </div>
+//               </div>
+
+//               <Button
+//                 onClick={() => setShowModal(false)}
+//                 className="w-full mt-4 bg-gray-200 text-gray-800 hover:bg-gray-300"
+//               >
+//                 Close
+//               </Button>
+//             </div>
+//           )}
+//         </DialogContent>
+//       </Dialog>
+
+//       {/* Scanned History */}
+//       <div className="mt-4 max-h-64 overflow-y-auto border rounded-md p-2 bg-white shadow-sm">
+//         {scannedList.map((item, idx) => (
+//           <div key={idx} className="p-2 border-b last:border-b-0">
+//             <span className="font-bold">{item.qrdata.data.bookingId}</span> - {item.qrdata.data.name} - <span className={`${item.qrdata.data.paymentStatus==="paid"?"text-green-600":"text-red-600"}`}>{item.qrdata.data.paymentStatus}</span>
+//           </div>
+//         ))}
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default Scanner;
+
+
+
+import { useState, useRef, useEffect } from "react";
+import { QrReader } from "react-qr-reader";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { CheckCircle2, Camera } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
+import axios from "axios";
 
 const Scanner = () => {
-  const [showSuccess, setShowSuccess] = useState(false);
-  const [scannedData, setScannedData] = useState<any>(null);
+  const backend_url = 'https://swedenn-backend.onrender.com';
 
-  const handleScan = () => {
-    // Simulate QR scan
-    const mockData = {
-      name: "Ramesh Kumar",
-      email: "ramesh@email.com",
-      seats: 4,
-      bookingId: "TFS2024001",
-      movie: "Modern Blockbuster 2024"
-    };
-    
-    setScannedData(mockData);
-    setShowSuccess(true);
-    toast.success("QR Code Scanned Successfully!");
+  const [scannedList, setScannedList] = useState<any[]>([]);
+  const [showModal, setShowModal] = useState(false);
+  const [currentScan, setCurrentScan] = useState<any>(null);
+  const [updated, setUpdated] = useState<any>(null);
+  const [facingMode, setFacingMode] = useState<"user" | "environment">("environment");
+
+  const lastScanRef = useRef<string | null>(null);
+
+  // Debugging state updates
+  useEffect(() => {
+    if (updated) console.log("Backend data:", updated);
+  }, [updated]);
+
+  useEffect(() => {
+    if (scannedList.length > 0) console.log("Scanned list:", scannedList);
+  }, [scannedList]);
+
+  const handleScan = async (result: any) => {
+    if (!result) return;
+
+    try {
+      const parsed = JSON.parse(result?.text || result);
+      const bookingData = parsed.qrdata.data;
+
+      // Prevent duplicate scan
+      if (lastScanRef.current === bookingData.bookingId) return;
+      lastScanRef.current = bookingData.bookingId;
+
+      setCurrentScan(parsed);
+
+      // Fetch backend verified booking
+      try {
+        const res = await axios.get(`${backend_url}/api/bookingid/${bookingData.bookingId}`);
+        setUpdated(res.data.data);
+      } catch (err) {
+        console.log("Backend fetch failed, using QR data:", err);
+        setUpdated(bookingData); // fallback to QR data
+      }
+
+      // Show modal and toast
+      setShowModal(true);
+      toast.success(`QR Scanned: ${bookingData.bookingId}`);
+
+      // Update scanned list
+      setScannedList(prev => [parsed, ...prev]);
+
+      // Allow next scan after short delay
+      setTimeout(() => (lastScanRef.current = null), 500);
+    } catch (err) {
+      console.log("Invalid QR format:", err);
+      toast.error("Invalid QR code format!");
+    }
   };
 
+  const displayData = updated || currentScan?.qrdata.data;
+
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-red-700 bg-clip-text text-transparent mb-2">
-            QR Code Scanner
-          </h1>
-          <p className="text-muted-foreground">Scan tickets for verification</p>
-        </div>
+    <div className="p-4 max-w-md mx-auto min-h-screen bg-gray-50">
+      <h1 className="text-3xl font-bold mb-4 text-center text-gray-800">QR Scanner</h1>
 
-        <div className="max-w-2xl mx-auto">
-          <Card className="shadow-2xl border-2">
-            <CardContent className="p-8">
-              <div className="flex flex-col items-center justify-center space-y-8">
-                <div className="p-8 bg-gradient-to-br from-primary/10 to-red-700/10 rounded-3xl">
-                  <QrCode className="h-32 w-32 text-primary" />
-                </div>
-                
-                <div className="text-center space-y-2">
-                  <h2 className="text-2xl font-bold">Ready to Scan</h2>
-                  <p className="text-muted-foreground max-w-md">
-                    Click the button below to simulate scanning a QR code from a ticket
-                  </p>
-                </div>
-
-                <Button
-                  onClick={handleScan}
-                  size="lg"
-                  className="bg-gradient-to-r from-primary to-red-700 hover:opacity-90 text-lg px-12 py-6 shadow-lg"
-                >
-                  <QrCode className="mr-2 h-5 w-5" />
-                  Scan QR Code
-                </Button>
-
-                <div className="mt-8 p-6 bg-secondary rounded-lg w-full">
-                  <h3 className="font-semibold mb-3 text-center">Scanner Instructions</h3>
-                  <ul className="space-y-2 text-sm text-muted-foreground">
-                    <li className="flex items-start gap-2">
-                      <span className="text-primary font-bold">1.</span>
-                      Position the QR code within the scanner frame
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-primary font-bold">2.</span>
-                      Wait for automatic detection and verification
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-primary font-bold">3.</span>
-                      Check the confirmation message and booking details
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        <Dialog open={showSuccess} onOpenChange={setShowSuccess}>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2 text-green-600 text-xl">
-                <CheckCircle2 className="h-6 w-6" />
-                Successfully Scanned!
-              </DialogTitle>
-            </DialogHeader>
-            
-            {scannedData && (
-              <div className="space-y-4 pt-4">
-                <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-                  <p className="text-center text-green-700 font-semibold">
-                    Ticket Verified ✓
-                  </p>
-                </div>
-                
-                <div className="space-y-3">
-                  <div className="flex justify-between py-2 border-b">
-                    <span className="text-muted-foreground">Booking ID:</span>
-                    <span className="font-semibold">{scannedData.bookingId}</span>
-                  </div>
-                  <div className="flex justify-between py-2 border-b">
-                    <span className="text-muted-foreground">Name:</span>
-                    <span className="font-semibold">{scannedData.name}</span>
-                  </div>
-                  <div className="flex justify-between py-2 border-b">
-                    <span className="text-muted-foreground">Email:</span>
-                    <span className="font-semibold">{scannedData.email}</span>
-                  </div>
-                  <div className="flex justify-between py-2 border-b">
-                    <span className="text-muted-foreground">Movie:</span>
-                    <span className="font-semibold">{scannedData.movie}</span>
-                  </div>
-                  <div className="flex justify-between py-2">
-                    <span className="text-muted-foreground">Seats:</span>
-                    <span className="font-semibold">{scannedData.seats}</span>
-                  </div>
-                </div>
-
-                <Button 
-                  onClick={() => setShowSuccess(false)} 
-                  className="w-full bg-gradient-to-r from-primary to-red-700"
-                >
-                  Close
-                </Button>
-              </div>
-            )}
-          </DialogContent>
-        </Dialog>
+      <div className="border rounded-lg overflow-hidden shadow-md">
+        <QrReader
+          constraints={{ facingMode }}
+          scanDelay={200}
+          onResult={handleScan}
+          videoContainerStyle={{ width: "100%", height: 400 }}
+        />
       </div>
+
+      <div className="flex justify-center mt-4">
+        <Button
+          onClick={() => setFacingMode(facingMode === "user" ? "environment" : "user")}
+          className="flex items-center gap-2"
+        >
+          <Camera className="h-4 w-4" /> Switch Camera
+        </Button>
+      </div>
+
+      {/* Modal */}
+      <Dialog open={showModal} onOpenChange={setShowModal}>
+        <DialogContent className="sm:max-w-md w-full p-4 max-h-[80vh]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-green-600 text-xl">
+              <CheckCircle2 className="h-6 w-6" /> Ticket Verified
+            </DialogTitle>
+          </DialogHeader>
+
+          {displayData && (
+  <div className="mt-4 space-y-4 max-h-[65vh] overflow-y-auto px-2 sm:px-4">
+    <div className="bg-blue-50 border-l-4 border-blue-500 px-4 py-2 rounded-md shadow-sm flex justify-between items-center">
+      <span className="font-semibold text-blue-800">Booking ID:</span>
+      <span className="font-bold text-blue-900">{displayData.bookingId}</span>
+    </div>
+
+    <div className="grid grid-cols-2 gap-2 sm:gap-4">
+      <div className="p-2 bg-gray-50 rounded-md shadow-sm">
+        <span className="text-gray-600">Name</span>
+        <p className="font-semibold text-gray-800">{displayData.name}</p>
+      </div>
+      <div className="p-2 bg-gray-50 rounded-md shadow-sm">
+        <span className="text-gray-600">Email</span>
+        <p className="font-semibold text-gray-800">{displayData.email}</p>
+      </div>
+      <div className="p-2 bg-gray-50 rounded-md shadow-sm">
+        <span className="text-gray-600">Seats</span>
+        <p className="font-semibold text-gray-800">{displayData.seatNumbers.join(", ")}</p>
+      </div>
+      <div className="p-2 bg-gray-50 rounded-md shadow-sm">
+        <span className="text-gray-600">Amount</span>
+        <p className="font-semibold text-gray-800">${displayData.totalAmount}</p>
+      </div>
+      <div className="p-2 bg-gray-50 rounded-md shadow-sm col-span-2 flex items-center justify-between">
+        <div>
+          <span className="text-gray-600">Payment Status</span>
+          <p className={`font-bold ${displayData.paymentStatus === "paid" ? "text-green-600" : "text-red-600"}`}>
+            {displayData.paymentStatus.toUpperCase()}
+          </p>
+        </div>
+        {/* Pending Button */}
+        {displayData.paymentStatus === "pending" && (
+          <Button
+            className="bg-yellow-500 text-white hover:bg-yellow-600"
+            onClick={async () => {
+               try {
+                    // 1️⃣ Update payment status on backend
+                    const res = await axios.put(
+                      `${backend_url}/dashboard/booking/${updated.bookingId}/status`,
+                      { paymentStatus: "paid" }
+                    );
+                
+                // Update UI
+                setUpdated({ ...displayData, paymentStatus: "paid" });
+                toast.success("Payment marked as PAID!");
+              } catch (err) {
+                console.log(err);
+                toast.error("Failed to update payment!");
+              }
+            }}
+          >
+            Mark as Paid
+          </Button>
+        )}
+      </div>
+    </div>
+
+    <Button
+      onClick={() => setShowModal(false)}
+      className="w-full mt-4 bg-gray-200 text-gray-800 hover:bg-gray-300"
+    >
+      Close
+    </Button>
+  </div>
+)}
+
+        </DialogContent>
+      </Dialog>
+
+      {/* Scanned History */}
+    {/* Scanned History */}
+        <div className="mt-4 max-h-64 overflow-y-auto border rounded-md p-2 bg-white shadow-sm">
+          {scannedList.map((item, idx) => {
+            const data = item.qrdata.data;
+            // If this is the ticket we just updated, show updated paymentStatus
+            const isUpdated = updated && updated.bookingId === data.bookingId;
+            const paymentStatus = isUpdated ? updated.paymentStatus : data.paymentStatus;
+
+            return (
+              <div key={idx} className="p-2 border-b last:border-b-0">
+                <span className="font-bold">{data.bookingId}</span> - {data.name} - 
+                <span className={`${paymentStatus === "paid" ? "text-green-600" : "text-red-600"}`}>
+                  {paymentStatus}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+
     </div>
   );
 };

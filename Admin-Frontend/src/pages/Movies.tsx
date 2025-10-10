@@ -41,6 +41,19 @@ interface Movie {
   shows: Show[];
 }
 
+const formatTime = (timeString) => {
+  const [hour, minute] = timeString.split(':');
+  const date = new Date();
+  date.setHours(hour, minute);
+  return date.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+};
+
+const formatDate = (dateString) => {
+  const options = { weekday: 'short', day: 'numeric', month: 'short' };
+  return new Date(dateString).toLocaleDateString(undefined, options);
+};
+
+
 const Movies = () => {
   const backend_url = 'https://swedenn-backend.onrender.com';
   const [movies, setMovies] = useState<Movie[]>([]);
@@ -276,7 +289,7 @@ const getPosterSrc = (poster: File | string) =>
             <ul className="list-disc pl-5">
               {modalMovie.shows.map((show, idx) => (
                 <li key={idx}>
-                  {show.date} - {show.time} - Online: {show.prices.online.adult}/{show.prices.online.kids}, Video: {show.prices.videoSpeed.adult}/{show.prices.videoSpeed.kids}, Soder: {show.prices.soder.adult}/{show.prices.soder.kids}
+                  {formatDate(show.date)} - {formatTime(show.time)} - Online: {show.prices.online.adult}/{show.prices.online.kids}, Video: {show.prices.videoSpeed.adult}/{show.prices.videoSpeed.kids}, Soder: {show.prices.soder.adult}/{show.prices.soder.kids}
                 </li>
               ))}
             </ul>

@@ -8,9 +8,10 @@ import Dashboard from "./pages/Dashboard";
 import Movies from "./pages/Movies";
 import Scanner from "./pages/Scanner";
 import Contact from "./pages/Contact";
-import NotFound from "./pages/NotFound";
+
 import Navbar from "./components/Navbar";
 import ProtectedRoute from "./components/ProtectedRoute";
+import Revenue from "./pages/Revenue";
 
 const queryClient = new QueryClient();
 
@@ -55,7 +56,15 @@ const App = () => (
               </ProtectedRoute>
             }
           />
-          <Route path="*" element={<NotFound />} />
+          <Route
+            path="/Revenue"
+            element={
+              <ProtectedRoute>
+                <Revenue/>
+              </ProtectedRoute>
+            }
+          />
+          {/* <Route path="*" element={<NotFound />} /> */}
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
