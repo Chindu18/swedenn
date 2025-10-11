@@ -291,6 +291,15 @@ const Scanner = () => {
                       `${backend_url}/dashboard/booking/${updated.bookingId}/status`,
                       { paymentStatus: "paid" }
                     );
+    //                  try {
+    //   await axios.post(`${backend_url}/booking/paid`, {
+    //     email: updatedBooking.email || 'chinraman8@gmail.com', // fallback
+    //     bookingId: updatedBooking.bookingId ||'bkg-4dtfv6f'
+    //   });
+    //   console.log("Email notification sent successfully");
+    // } catch (emailError) {
+    //   console.error("Failed to send email notification:", emailError);
+    // }
                 
                 // Update UI
                 setUpdated({ ...displayData, paymentStatus: "paid" });
